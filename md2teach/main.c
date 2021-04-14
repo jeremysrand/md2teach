@@ -13,6 +13,8 @@
 
 #include "md4c.h"
 
+#pragma memorymodel 1
+
 // GS_TODO - Scan all of the code looking at uses of int and unsigned and
 // consider changing them to long and unsigned long if they need to use
 // numbers > 64K.
