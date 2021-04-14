@@ -54,7 +54,7 @@ TARGETTYPE=shell
 ROOTCFILE=main.c
 
 # Add any arguments you want passed to the C compiler to this variable:
-CFLAGS+=
+CFLAGS+=+O
 
 # Add any arguments you want passed to the resource compiler to this variable:
 REZFLAGS+=

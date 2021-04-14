@@ -15,6 +15,7 @@
 		9D6532F82626240800105D50 /* orca-rez in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532F72626240800105D50 /* orca-rez */; };
 		9D6532FA2626240800105D50 /* tail.mk in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532F92626240800105D50 /* tail.mk */; };
 		9D6532FD2626240800105D50 /* md2teach.xcscheme in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532FC2626240800105D50 /* md2teach.xcscheme */; };
+		9D65330D2626246700105D50 /* md4c.c in Sources */ = {isa = PBXBuildFile; fileRef = 9D65330C2626246700105D50 /* md4c.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,6 +47,8 @@
 		9D6532F72626240800105D50 /* orca-rez */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "orca-rez"; sourceTree = "<group>"; };
 		9D6532F92626240800105D50 /* tail.mk */ = {isa = PBXFileReference; lastKnownFileType = text; path = tail.mk; sourceTree = "<group>"; };
 		9D6532FC2626240800105D50 /* md2teach.xcscheme */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = md2teach.xcscheme; path = ../../md2teach.xcodeproj/xcshareddata/xcschemes/md2teach.xcscheme; sourceTree = "<group>"; };
+		9D65330B2626246700105D50 /* md4c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md4c.h; sourceTree = "<group>"; };
+		9D65330C2626246700105D50 /* md4c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = md4c.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +83,8 @@
 			isa = PBXGroup;
 			children = (
 				9D6532EC2626240800105D50 /* main.c */,
+				9D65330C2626246700105D50 /* md4c.c */,
+				9D65330B2626246700105D50 /* md4c.h */,
 				9D6532EE2626240800105D50 /* Makefile */,
 				9D6532F02626240800105D50 /* make */,
 				9D6532FB2626240800105D50 /* Supporting Files */,
@@ -203,6 +208,7 @@
 			files = (
 				9D6532EF2626240800105D50 /* Makefile in Sources */,
 				9D6532ED2626240800105D50 /* main.c in Sources */,
+				9D65330D2626246700105D50 /* md4c.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9D0B917C1F526C2D004D7E0B"
+               BlueprintIdentifier = "9D6532E22626240800105D50"
                BuildableName = "md2teach"
                BlueprintName = "md2teach"
                ReferencedContainer = "container:md2teach.xcodeproj">
@@ -29,8 +29,6 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -49,7 +47,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9D0B917C1F526C2D004D7E0B"
+            BlueprintIdentifier = "9D6532E22626240800105D50"
             BuildableName = "md2teach"
             BlueprintName = "md2teach"
             ReferencedContainer = "container:md2teach.xcodeproj">
@@ -61,8 +59,6 @@
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -73,7 +69,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9D0B917C1F526C2D004D7E0B"
+            BlueprintIdentifier = "9D6532E22626240800105D50"
             BuildableName = "md2teach"
             BlueprintName = "md2teach"
             ReferencedContainer = "container:md2teach.xcodeproj">
