@@ -3,7 +3,7 @@
  * md2teach
  *
  * Created by Jeremy Rand on 2021-04-13.
- * Copyright (c) 2021 ___ORGANIZATIONNAME___. All rights reserved.
+ * Copyright (c) 2021 Jeremy Rand. All rights reserved.
  *
  */
 
@@ -29,6 +29,8 @@
 // suspect things can get much worse with a complex document but this
 // approach should let me measure the worst case stack with a complex
 // document.
+//
+// Leaving the stack very big for now at 32K.
 #pragma stacksize 32768
 
 
