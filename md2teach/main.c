@@ -8,7 +8,9 @@
  */
 
 
+#include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "md4c.h"
@@ -58,8 +60,6 @@ MD_PARSER parser = {
     NULL // syntax
 };
 
-char *testMarkdown = "Hello, world!\n\nMore text\n";
-
 
 // Implementation
 
@@ -108,10 +108,69 @@ static void debugLogHook(const char * message, void * userdata)
 
 int main(int argc, char * argv[])
 {
-    int result;
+    static int result;
+    
+    static char * commandName;
+    
+    static char * inputFileName;
+    static FILE * inputFile;
+    static long inputFileLen;
+    static char * inputBuffer;
+    
+    static char * outputFileName;
+    
     printf("Stack start: %p\n", &result);
     
-    result = md_parse(testMarkdown, strlen(testMarkdown), &parser, NULL);
+    if (argc != 3) {
+        fprintf(stderr, "USAGE: %s inputfile outputfile\n", argv[0]);
+        exit(1);
+    }
+    
+    commandName = argv[0];
+    inputFileName = argv[1];
+    outputFileName = argv[2];
+    
+    inputFile = fopen(inputFileName, "r");
+    if (inputFile == NULL) {
+        fprintf(stderr, "%s: Unable to open file %s, %s\n", commandName, inputFileName, strerror(errno));
+        exit(1);
+    }
+    
+    if (fseek(inputFile, 0l, SEEK_END) != 0) {
+        fprintf(stderr, "%s: Unable to seek to the end of file %s, %s\n", commandName, inputFileName, strerror(errno));
+        fclose(inputFile);
+        exit(1);
+    }
+    
+    inputFileLen = ftell(inputFile);
+    if (inputFileLen < 0) {
+        fprintf(stderr, "%s: Unable to get size of file %s, %s\n", commandName, inputFileName, strerror(errno));
+        fclose(inputFile);
+        exit(1);
+    }
+    
+    inputBuffer = malloc(inputFileLen);
+    if (inputBuffer == NULL) {
+        fprintf(stderr, "%s: Unable to allocate %ld bytes for input buffer\n", commandName, inputFileLen);
+        fclose(inputFile);
+        exit(1);
+    }
+    
+    if (fseek(inputFile, 0l, SEEK_SET) != 0) {
+        fprintf(stderr, "%s: Unable to seek to the beginning of file %s, %s\n", commandName, inputFileName, strerror(errno));
+        free(inputBuffer);
+        fclose(inputFile);
+        exit(1);
+    }
+    
+    if (fread(inputBuffer, 1, inputFileLen, inputFile) != inputFileLen) {
+        fprintf(stderr, "%s: Unable to read all of file %s, %s\n", commandName, inputFileName, strerror(errno));
+        free(inputBuffer);
+        fclose(inputFile);
+        exit(1);
+    }
+    
+    result = md_parse(inputBuffer, inputFileLen, &parser, NULL);
     printf("Parser result: %d\n", result);
     
     return 0;
