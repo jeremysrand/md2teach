@@ -45,9 +45,14 @@
 #endif
 
 // GS_SPECIFIC - This was just unsigned but on a GS, we need this to be unsigned
-// long to support > 64K sizes and offsets.
-typedef unsigned long MD_SIZE;
-typedef unsigned long MD_OFFSET;
+// long to support > 64K sizes and offsets.  Also, rather than create a dependency
+// on stdint.h which doesn't exist in the base ORCA/C distribution, I am defining
+// int32_t and uint32_t here:
+typedef long int32_t;
+typedef unsigned long uint32_t;
+
+typedef uint32_t MD_SIZE;
+typedef uint32_t MD_OFFSET;
 
 
 /* Block represents a part of document hierarchy structure like a paragraph

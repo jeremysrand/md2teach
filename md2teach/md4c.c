@@ -147,8 +147,8 @@ typedef struct MD_REF_DEF_tag MD_REF_DEF;
  */
 typedef struct MD_MARKCHAIN_tag MD_MARKCHAIN;
 struct MD_MARKCHAIN_tag {
-    int head;   /* Index of first mark in the chain, or -1 if empty. */
-    int tail;   /* Index of last mark in the chain, or -1 if empty. */
+    int32_t head;   /* Index of first mark in the chain, or -1 if empty. */
+    int32_t tail;   /* Index of last mark in the chain, or -1 if empty. */
 };
 
 /* Context propagated through all the parsing. */
@@ -165,22 +165,22 @@ struct MD_CTX_tag {
 
     /* Helper temporary growing buffer. */
     CHAR* buffer;
-    unsigned alloc_buffer;
+    uint32_t alloc_buffer;
 
     /* Reference definitions. */
     MD_REF_DEF* ref_defs;
-    int n_ref_defs;
-    int alloc_ref_defs;
+    int32_t n_ref_defs;
+    int32_t alloc_ref_defs;
     void** ref_def_hashtable;
-    int ref_def_hashtable_size;
+    int32_t ref_def_hashtable_size;
 
     /* Stack of inline/span markers.
      * This is only used for parsing a single block contents but by storing it
      * here we may reuse the stack for subsequent blocks; i.e. we have fewer
      * (re)allocations. */
     MD_MARK* marks;
-    int n_marks;
-    int alloc_marks;
+    int32_t n_marks;
+    int32_t alloc_marks;
 
 #if defined MD4C_USE_UTF16
     char mark_char_map[128];
@@ -209,8 +209,8 @@ struct MD_CTX_tag {
     int n_table_cell_boundaries;
 
     /* For resolving links. */
-    int unresolved_link_head;
-    int unresolved_link_tail;
+    int32_t unresolved_link_head;
+    int32_t unresolved_link_tail;
 
     /* For resolving raw HTML. */
     OFF html_comment_horizon;
@@ -227,13 +227,13 @@ struct MD_CTX_tag {
      */
     void* block_bytes;
     MD_BLOCK* current_block;
-    int n_block_bytes;
-    int alloc_block_bytes;
+    int32_t n_block_bytes;
+    int32_t alloc_block_bytes;
 
     /* For container block analysis. */
     MD_CONTAINER* containers;
-    int n_containers;
-    int alloc_containers;
+    int32_t n_containers;
+    int32_t alloc_containers;
 
     /* Minimal indentation to call the block "indented code block". */
     unsigned code_indent_offset;
@@ -905,11 +905,11 @@ struct MD_UNICODE_FOLD_INFO_tag {
  * what the caller should allocate.)
  */
 static void
-md_merge_lines(MD_CTX* ctx, OFF beg, OFF end, const MD_LINE* lines, int n_lines,
+md_merge_lines(MD_CTX* ctx, OFF beg, OFF end, const MD_LINE* lines, int32_t n_lines,
                CHAR line_break_replacement_char, CHAR* buffer, SZ* p_size)
 {
     CHAR* ptr = buffer;
-    int line_index = 0;
+    int32_t line_index = 0;
     OFF off = beg;
 
     MD_UNUSED(n_lines);
@@ -942,7 +942,7 @@ md_merge_lines(MD_CTX* ctx, OFF beg, OFF end, const MD_LINE* lines, int n_lines,
 /* Wrapper of md_merge_lines() which allocates new buffer for the output string.
  */
 static int
-md_merge_lines_alloc(MD_CTX* ctx, OFF beg, OFF end, const MD_LINE* lines, int n_lines,
+md_merge_lines_alloc(MD_CTX* ctx, OFF beg, OFF end, const MD_LINE* lines, int32_t n_lines,
                     CHAR line_break_replacement_char, CHAR** p_str, SZ* p_size)
 {
     CHAR* buffer;
@@ -989,12 +989,12 @@ md_skip_unicode_whitespace(const CHAR* label, OFF off, SZ size)
  * by n_lines == 0.
  */
 static int
-md_is_html_tag(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg, OFF max_end, OFF* p_end)
+md_is_html_tag(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, OFF beg, OFF max_end, OFF* p_end)
 {
     int attr_state;
     OFF off = beg;
     OFF line_end = (n_lines > 0) ? lines[0].end : ctx->size;
-    int i = 0;
+    int32_t i = 0;
 
     MD_ASSERT(CH(beg) == _T('<'));
 
@@ -1108,12 +1108,12 @@ done:
 
 static int
 md_scan_for_html_closer(MD_CTX* ctx, const MD_CHAR* str, MD_SIZE len,
-                        const MD_LINE* lines, int n_lines,
+                        const MD_LINE* lines, int32_t n_lines,
                         OFF beg, OFF max_end, OFF* p_end,
                         OFF* p_scan_horizon)
 {
     OFF off = beg;
-    int i = 0;
+    int32_t i = 0;
 
     if(off < *p_scan_horizon  &&  *p_scan_horizon >= max_end - len) {
         /* We have already scanned the range up to the max_end so we know
@@ -1143,7 +1143,7 @@ md_scan_for_html_closer(MD_CTX* ctx, const MD_CHAR* str, MD_SIZE len,
 }
 
 static int
-md_is_html_comment(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg, OFF max_end, OFF* p_end)
+md_is_html_comment(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, OFF beg, OFF max_end, OFF* p_end)
 {
     OFF off = beg;
 
@@ -1176,7 +1176,7 @@ md_is_html_comment(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg, OFF 
 }
 
 static int
-md_is_html_processing_instruction(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg, OFF max_end, OFF* p_end)
+md_is_html_processing_instruction(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, OFF beg, OFF max_end, OFF* p_end)
 {
     OFF off = beg;
 
@@ -1191,7 +1191,7 @@ md_is_html_processing_instruction(MD_CTX* ctx, const MD_LINE* lines, int n_lines
 }
 
 static int
-md_is_html_declaration(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg, OFF max_end, OFF* p_end)
+md_is_html_declaration(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, OFF beg, OFF max_end, OFF* p_end)
 {
     OFF off = beg;
 
@@ -1215,7 +1215,7 @@ md_is_html_declaration(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg, 
 }
 
 static int
-md_is_html_cdata(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg, OFF max_end, OFF* p_end)
+md_is_html_cdata(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, OFF beg, OFF max_end, OFF* p_end)
 {
     static const CHAR open_str[] = _T("<![CDATA[");
     static const SZ open_size = SIZEOF_ARRAY(open_str) - 1;
@@ -1236,7 +1236,7 @@ md_is_html_cdata(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg, OFF ma
 }
 
 static int
-md_is_html_any(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg, OFF max_end, OFF* p_end)
+md_is_html_any(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, OFF beg, OFF max_end, OFF* p_end)
 {
     MD_ASSERT(CH(beg) == _T('<'));
     return (md_is_html_tag(ctx, lines, n_lines, beg, max_end, p_end)  ||
@@ -1347,8 +1347,8 @@ struct MD_ATTRIBUTE_BUILD_tag {
     CHAR* text;
     MD_TEXTTYPE* substr_types;
     OFF* substr_offsets;
-    int substr_count;
-    int substr_alloc;
+    int32_t substr_count;
+    int32_t substr_alloc;
     MD_TEXTTYPE trivial_types[1];
     OFF trivial_offsets[2];
 };
@@ -1494,16 +1494,15 @@ abort:
  ***  Dictionary of Reference Definitions  ***
  *********************************************/
 
-// GS_TODO - I don't think unsigned here is large enough for the hash.  This
-// probably needs to be an unsigned long.
-#define MD_FNV1A_BASE       2166136261U
-#define MD_FNV1A_PRIME      16777619U
+// GS_SPECIFIC - Lots of unsigned changed to unsigned longs in this hash code.
+#define MD_FNV1A_BASE       2166136261UL
+#define MD_FNV1A_PRIME      16777619UL
 
-static inline unsigned
-md_fnv1a(unsigned base, const void* data, size_t n)
+static inline uint32_t
+md_fnv1a(uint32_t base, const void* data, size_t n)
 {
     const unsigned char* buf = (const unsigned char*) data;
-    unsigned hash = base;
+    uint32_t hash = base;
     size_t i;
 
     for(i = 0; i < n; i++) {
@@ -1518,7 +1517,7 @@ md_fnv1a(unsigned base, const void* data, size_t n)
 struct MD_REF_DEF_tag {
     CHAR* label;
     CHAR* title;
-    unsigned hash;
+    uint32_t hash;
     SZ label_size;
     SZ title_size;
     OFF dest_beg;
@@ -1531,10 +1530,10 @@ struct MD_REF_DEF_tag {
  * folding. This complicates computing a hash of it as well as direct comparison
  * of two labels. */
 
-static unsigned
+static uint32_t
 md_link_label_hash(const CHAR* label, SZ size)
 {
-    unsigned hash = MD_FNV1A_BASE;
+    uint32_t hash = MD_FNV1A_BASE;
     OFF off;
     unsigned codepoint;
     int is_whitespace = FALSE;
@@ -1630,8 +1629,8 @@ md_link_label_cmp(const CHAR* a_label, SZ a_size, const CHAR* b_label, SZ b_size
 
 typedef struct MD_REF_DEF_LIST_tag MD_REF_DEF_LIST;
 struct MD_REF_DEF_LIST_tag {
-    int n_ref_defs;
-    int alloc_ref_defs;
+    int32_t n_ref_defs;
+    int32_t alloc_ref_defs;
     MD_REF_DEF* ref_defs[];  /* Valid items always  point into ctx->ref_defs[] */
 };
 
@@ -1675,7 +1674,7 @@ md_ref_def_cmp_for_sort(const void* a, const void* b)
 static int
 md_build_ref_def_hashtable(MD_CTX* ctx)
 {
-    int i, j;
+    int32_t i, j;
 
     if(ctx->n_ref_defs == 0)
         return 0;
@@ -1741,7 +1740,7 @@ md_build_ref_def_hashtable(MD_CTX* ctx)
          * is sorted. */
         list = (MD_REF_DEF_LIST*) bucket;
         if(list->n_ref_defs >= list->alloc_ref_defs) {
-            int alloc_ref_defs = list->alloc_ref_defs + list->alloc_ref_defs / 2;
+            int32_t alloc_ref_defs = list->alloc_ref_defs + list->alloc_ref_defs / 2;
             MD_REF_DEF_LIST* list_tmp = (MD_REF_DEF_LIST*) realloc(list,
                         sizeof(MD_REF_DEF_LIST) + alloc_ref_defs * sizeof(MD_REF_DEF*));
             if(list_tmp == NULL) {
@@ -1790,7 +1789,7 @@ static void
 md_free_ref_def_hashtable(MD_CTX* ctx)
 {
     if(ctx->ref_def_hashtable != NULL) {
-        int i;
+        int32_t i;
 
         for(i = 0; i < ctx->ref_def_hashtable_size; i++) {
             void* bucket = ctx->ref_def_hashtable[i];
@@ -1808,7 +1807,7 @@ md_free_ref_def_hashtable(MD_CTX* ctx)
 static const MD_REF_DEF*
 md_lookup_ref_def(MD_CTX* ctx, const CHAR* label, SZ label_size)
 {
-    unsigned hash;
+    uint32_t hash;
     void* bucket;
 
     if(ctx->ref_def_hashtable_size == 0)
@@ -1866,15 +1865,15 @@ struct MD_LINK_ATTR_tag {
 
 
 static int
-md_is_link_label(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg,
-                 OFF* p_end, int* p_beg_line_index, int* p_end_line_index,
+md_is_link_label(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, OFF beg,
+                 OFF* p_end, int32_t* p_beg_line_index, int32_t* p_end_line_index,
                  OFF* p_contents_beg, OFF* p_contents_end)
 {
     OFF off = beg;
     OFF contents_beg = 0;
     OFF contents_end = 0;
-    int line_index = 0;
-    int len = 0;
+    int32_t line_index = 0;
+    int32_t len = 0;
 
     if(CH(off) != _T('['))
         return FALSE;
@@ -2023,13 +2022,13 @@ md_is_link_destination(MD_CTX* ctx, OFF beg, OFF max_end, OFF* p_end,
 }
 
 static int
-md_is_link_title(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg,
-                 OFF* p_end, int* p_beg_line_index, int* p_end_line_index,
+md_is_link_title(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, OFF beg,
+                 OFF* p_end, int32_t* p_beg_line_index, int32_t* p_end_line_index,
                  OFF* p_contents_beg, OFF* p_contents_end)
 {
     OFF off = beg;
     CHAR closer_char;
-    int line_index = 0;
+    int32_t line_index = 0;
 
     /* White space with up to one line break. */
     while(off < lines[line_index].end  &&  ISWHITESPACE(off))
@@ -2090,22 +2089,22 @@ md_is_link_title(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg,
  *
  * Returns -1 in case of an error (out of memory).
  */
-static int
-md_is_link_reference_definition(MD_CTX* ctx, const MD_LINE* lines, int n_lines)
+static int32_t
+md_is_link_reference_definition(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines)
 {
     OFF label_contents_beg;
     OFF label_contents_end;
-    int label_contents_line_index = -1;
+    int32_t label_contents_line_index = -1;
     int label_is_multiline = FALSE;
     OFF dest_contents_beg;
     OFF dest_contents_end;
     OFF title_contents_beg;
     OFF title_contents_end;
-    int title_contents_line_index;
+    int32_t title_contents_line_index;
     int title_is_multiline = FALSE;
     OFF off;
-    int line_index = 0;
-    int tmp_line_index;
+    int32_t line_index = 0;
+    int32_t tmp_line_index;
     MD_REF_DEF* def = NULL;
     int ret = 0;
 
@@ -2213,7 +2212,7 @@ abort:
 }
 
 static int
-md_is_link_reference(MD_CTX* ctx, const MD_LINE* lines, int n_lines,
+md_is_link_reference(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines,
                      OFF beg, OFF end, MD_LINK_ATTR* attr)
 {
     const MD_REF_DEF* def;
@@ -2267,14 +2266,14 @@ abort:
 }
 
 static int
-md_is_inline_link_spec(MD_CTX* ctx, const MD_LINE* lines, int n_lines,
+md_is_inline_link_spec(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines,
                        OFF beg, OFF* p_end, MD_LINK_ATTR* attr)
 {
-    int line_index = 0;
-    int tmp_line_index;
+    int32_t line_index = 0;
+    int32_t tmp_line_index;
     OFF title_contents_beg;
     OFF title_contents_end;
-    int title_contents_line_index;
+    int32_t title_contents_line_index;
     int title_is_multiline;
     OFF off = beg;
     int ret = FALSE;
@@ -2366,7 +2365,7 @@ abort:
 static void
 md_free_ref_defs(MD_CTX* ctx)
 {
-    int i;
+    int32_t i;
 
     for(i = 0; i < ctx->n_ref_defs; i++) {
         MD_REF_DEF* def = &ctx->ref_defs[i];
@@ -2457,8 +2456,8 @@ struct MD_MARK_tag {
      * During resolving, we disconnect from the chain and point to the
      * corresponding counterpart so opener points to its closer and vice versa.
      */
-    int prev;
-    int next;
+    int32_t prev;
+    int32_t next;
     CHAR ch;
     unsigned char flags;
 };
@@ -2495,7 +2494,7 @@ md_asterisk_chain(MD_CTX* ctx, unsigned flags)
 }
 
 static MD_MARKCHAIN*
-md_mark_chain(MD_CTX* ctx, int mark_index)
+md_mark_chain(MD_CTX* ctx, int32_t mark_index)
 {
     MD_MARK* mark = &ctx->marks[mark_index];
 
@@ -2552,7 +2551,7 @@ md_push_mark(MD_CTX* ctx)
 
 
 static void
-md_mark_chain_append(MD_CTX* ctx, MD_MARKCHAIN* chain, int mark_index)
+md_mark_chain_append(MD_CTX* ctx, MD_MARKCHAIN* chain, int32_t mark_index)
 {
     if(chain->tail >= 0)
         ctx->marks[chain->tail].next = mark_index;
@@ -2568,7 +2567,7 @@ md_mark_chain_append(MD_CTX* ctx, MD_MARKCHAIN* chain, int mark_index)
  * so we do not bother to make MD_MARK use union, and it can only happen
  * for dummy marks. */
 static inline void
-md_mark_store_ptr(MD_CTX* ctx, int mark_index, void* ptr)
+md_mark_store_ptr(MD_CTX* ctx, int32_t mark_index, void* ptr)
 {
     MD_MARK* mark = &ctx->marks[mark_index];
     MD_ASSERT(mark->ch == 'D');
@@ -2579,7 +2578,7 @@ md_mark_store_ptr(MD_CTX* ctx, int mark_index, void* ptr)
 }
 
 static inline void*
-md_mark_get_ptr(MD_CTX* ctx, int mark_index)
+md_mark_get_ptr(MD_CTX* ctx, int32_t mark_index)
 {
     void* ptr;
     MD_MARK* mark = &ctx->marks[mark_index];
@@ -2589,7 +2588,7 @@ md_mark_get_ptr(MD_CTX* ctx, int mark_index)
 }
 
 static void
-md_resolve_range(MD_CTX* ctx, MD_MARKCHAIN* chain, int opener_index, int closer_index)
+md_resolve_range(MD_CTX* ctx, MD_MARKCHAIN* chain, int32_t opener_index, int32_t closer_index)
 {
     MD_MARK* opener = &ctx->marks[opener_index];
     MD_MARK* closer = &ctx->marks[closer_index];
@@ -2634,10 +2633,10 @@ md_resolve_range(MD_CTX* ctx, MD_MARKCHAIN* chain, int opener_index, int closer_
  *     inside the range are retained as well as any unpaired marks.
  */
 static void
-md_rollback(MD_CTX* ctx, int opener_index, int closer_index, int how)
+md_rollback(MD_CTX* ctx, int32_t opener_index, int32_t closer_index, int how)
 {
     int i;
-    int mark_index;
+    int32_t mark_index;
 
     /* Cut all unresolved openers at the mark index. */
     for(i = OPENERS_CHAIN_FIRST; i < OPENERS_CHAIN_LAST+1; i++) {
@@ -2661,7 +2660,7 @@ md_rollback(MD_CTX* ctx, int opener_index, int closer_index, int how)
         int discard_flag = (how == MD_ROLLBACK_ALL);
 
         if(mark->flags & MD_MARK_CLOSER) {
-            int mark_opener_index = mark->prev;
+            int32_t mark_opener_index = mark->prev;
 
             /* Undo opener BEFORE the range. */
             if(mark_opener_index < opener_index) {
@@ -2750,7 +2749,7 @@ md_build_mark_char_map(MD_CTX* ctx)
 #define CODESPAN_MARK_MAXLEN    32
 
 static int
-md_is_code_span(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg,
+md_is_code_span(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, OFF beg,
                 OFF* p_opener_beg, OFF* p_opener_end,
                 OFF* p_closer_beg, OFF* p_closer_end,
                 OFF last_potential_closers[CODESPAN_MARK_MAXLEN],
@@ -2767,7 +2766,7 @@ md_is_code_span(MD_CTX* ctx, const MD_LINE* lines, int n_lines, OFF beg,
     int has_space_before_closer = FALSE;
     int has_eol_before_closer = FALSE;
     int has_only_space = TRUE;
-    int line_index = 0;
+    int32_t line_index = 0;
 
     line_end = lines[0].end;
     opener_end = opener_beg;
@@ -2978,9 +2977,9 @@ md_is_autolink(MD_CTX* ctx, OFF beg, OFF max_end, OFF* p_end, int* p_missing_mai
 segment "md4c2";
 
 static int
-md_collect_marks(MD_CTX* ctx, const MD_LINE* lines, int n_lines, int table_mode)
+md_collect_marks(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, int table_mode)
 {
-    int i;
+    int32_t i;
     int ret = 0;
     MD_MARK* mark;
     // GS_TODO - This array is 4 * 32 or 128 bytes on the stack.  Would be good to get
@@ -3355,7 +3354,7 @@ abort:
 }
 
 static void
-md_analyze_bracket(MD_CTX* ctx, int mark_index)
+md_analyze_bracket(MD_CTX* ctx, int32_t mark_index)
 {
     /* We cannot really resolve links here as for that we would need
      * more context. E.g. a following pair of brackets (reference link),
@@ -3379,7 +3378,7 @@ md_analyze_bracket(MD_CTX* ctx, int mark_index)
 
     if(BRACKET_OPENERS.tail >= 0) {
         /* Pop the opener from the chain. */
-        int opener_index = BRACKET_OPENERS.tail;
+        int32_t opener_index = BRACKET_OPENERS.tail;
         MD_MARK* opener = &ctx->marks[opener_index];
         if(opener->prev >= 0)
             ctx->marks[opener->prev].next = -1;
@@ -3410,13 +3409,13 @@ md_analyze_bracket(MD_CTX* ctx, int mark_index)
 // locals and we might blow the stack.
 
 /* Forward declaration. */
-static void md_analyze_link_contents(MD_CTX* ctx, const MD_LINE* lines, int n_lines,
-                                     int mark_beg, int mark_end);
+static void md_analyze_link_contents(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines,
+                                     int32_t mark_beg, int32_t mark_end);
 
 static int
-md_resolve_links(MD_CTX* ctx, const MD_LINE* lines, int n_lines)
+md_resolve_links(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines)
 {
-    int opener_index = ctx->unresolved_link_head;
+    int32_t opener_index = ctx->unresolved_link_head;
     OFF last_link_beg = 0;
     OFF last_link_end = 0;
     OFF last_img_beg = 0;
@@ -3424,9 +3423,9 @@ md_resolve_links(MD_CTX* ctx, const MD_LINE* lines, int n_lines)
 
     while(opener_index >= 0) {
         MD_MARK* opener = &ctx->marks[opener_index];
-        int closer_index = opener->next;
+        int32_t closer_index = opener->next;
         MD_MARK* closer = &ctx->marks[closer_index];
-        int next_index = opener->prev;
+        int32_t next_index = opener->prev;
         MD_MARK* next_opener;
         MD_MARK* next_closer;
         MD_LINK_ATTR attr;
@@ -3470,7 +3469,7 @@ md_resolve_links(MD_CTX* ctx, const MD_LINE* lines, int n_lines)
             (next_closer->end - next_closer->beg == 1))
         {
             MD_MARK* delim = NULL;
-            int delim_index;
+            int32_t delim_index;
             OFF dest_beg, dest_end;
 
             is_link = TRUE;
@@ -3572,7 +3571,7 @@ md_resolve_links(MD_CTX* ctx, const MD_LINE* lines, int n_lines)
                 /* Check the closing ')' is not inside an already resolved range
                  * (i.e. a range with a higher priority), e.g. a code span. */
                 if(is_link) {
-                    int i = closer_index + 1;
+                    int32_t i = closer_index + 1;
 
                     while(i < ctx->n_marks) {
                         MD_MARK* mark = &ctx->marks[i];
@@ -3647,7 +3646,7 @@ md_resolve_links(MD_CTX* ctx, const MD_LINE* lines, int n_lines)
 /* Analyze whether the mark '&' starts a HTML entity.
  * If so, update its flags as well as flags of corresponding closer ';'. */
 static void
-md_analyze_entity(MD_CTX* ctx, int mark_index)
+md_analyze_entity(MD_CTX* ctx, int32_t mark_index)
 {
     MD_MARK* opener = &ctx->marks[mark_index];
     MD_MARK* closer;
@@ -3675,7 +3674,7 @@ md_analyze_entity(MD_CTX* ctx, int mark_index)
 }
 
 static void
-md_analyze_table_cell_boundary(MD_CTX* ctx, int mark_index)
+md_analyze_table_cell_boundary(MD_CTX* ctx, int32_t mark_index)
 {
     MD_MARK* mark = &ctx->marks[mark_index];
     mark->flags |= MD_MARK_RESOLVED;
@@ -3688,11 +3687,11 @@ md_analyze_table_cell_boundary(MD_CTX* ctx, int mark_index)
  * characters. May only be called if an adequate number of dummy 'D' marks
  * follows.
  */
-static int
-md_split_emph_mark(MD_CTX* ctx, int mark_index, SZ n)
+static int32_t
+md_split_emph_mark(MD_CTX* ctx, int32_t mark_index, SZ n)
 {
     MD_MARK* mark = &ctx->marks[mark_index];
-    int new_mark_index = mark_index + (mark->end - mark->beg - n);
+    int32_t new_mark_index = mark_index + (mark->end - mark->beg - n);
     MD_MARK* dummy = &ctx->marks[new_mark_index];
 
     MD_ASSERT(mark->end - mark->beg > n);
@@ -3706,7 +3705,7 @@ md_split_emph_mark(MD_CTX* ctx, int mark_index, SZ n)
 }
 
 static void
-md_analyze_emph(MD_CTX* ctx, int mark_index)
+md_analyze_emph(MD_CTX* ctx, int32_t mark_index)
 {
     MD_MARK* mark = &ctx->marks[mark_index];
     MD_MARKCHAIN* chain = md_mark_chain(ctx, mark_index);
@@ -3714,7 +3713,7 @@ md_analyze_emph(MD_CTX* ctx, int mark_index)
     /* If we can be a closer, try to resolve with the preceding opener. */
     if(mark->flags & MD_MARK_POTENTIAL_CLOSER) {
         MD_MARK* opener = NULL;
-        int opener_index = 0;
+        int32_t opener_index = 0;
 
         if(mark->ch == _T('*')) {
             MD_MARKCHAIN* opener_chains[6];
@@ -3737,7 +3736,7 @@ md_analyze_emph(MD_CTX* ctx, int mark_index)
             /* Opener is the most recent mark from the allowed chains. */
             for(i = 0; i < n_opener_chains; i++) {
                 if(opener_chains[i]->tail >= 0) {
-                    int tmp_index = opener_chains[i]->tail;
+                    int32_t tmp_index = opener_chains[i]->tail;
                     MD_MARK* tmp_mark = &ctx->marks[tmp_index];
                     if(opener == NULL  ||  tmp_mark->end > opener->end) {
                         opener_index = tmp_index;
@@ -3778,7 +3777,7 @@ md_analyze_emph(MD_CTX* ctx, int mark_index)
 }
 
 static void
-md_analyze_tilde(MD_CTX* ctx, int mark_index)
+md_analyze_tilde(MD_CTX* ctx, int32_t mark_index)
 {
     MD_MARK* mark = &ctx->marks[mark_index];
     MD_MARKCHAIN* chain = md_mark_chain(ctx, mark_index);
@@ -3788,7 +3787,7 @@ md_analyze_tilde(MD_CTX* ctx, int mark_index)
      * and closer has to match. */
 
     if((mark->flags & MD_MARK_POTENTIAL_CLOSER)  &&  chain->head >= 0) {
-        int opener_index = chain->head;
+        int32_t opener_index = chain->head;
 
         md_rollback(ctx, opener_index, mark_index, MD_ROLLBACK_CROSSING);
         md_resolve_range(ctx, chain, opener_index, mark_index);
@@ -3800,7 +3799,7 @@ md_analyze_tilde(MD_CTX* ctx, int mark_index)
 }
 
 static void
-md_analyze_dollar(MD_CTX* ctx, int mark_index)
+md_analyze_dollar(MD_CTX* ctx, int32_t mark_index)
 {
     /* This should mimic the way inline equations work in LaTeX, so there
      * can only ever be one item in the chain (i.e. the dollars can't be
@@ -3814,7 +3813,7 @@ md_analyze_dollar(MD_CTX* ctx, int mark_index)
         MD_MARK* open = &ctx->marks[DOLLAR_OPENERS.head];
         MD_MARK* close = &ctx->marks[mark_index];
 
-        int opener_index = DOLLAR_OPENERS.head;
+        int32_t opener_index = DOLLAR_OPENERS.head;
         md_rollback(ctx, opener_index, mark_index, MD_ROLLBACK_ALL);
         if (open->end - open->beg == close->end - close->beg) {
             /* We are the matching closer */
@@ -3830,10 +3829,10 @@ md_analyze_dollar(MD_CTX* ctx, int mark_index)
 }
 
 static void
-md_analyze_permissive_url_autolink(MD_CTX* ctx, int mark_index)
+md_analyze_permissive_url_autolink(MD_CTX* ctx, int32_t mark_index)
 {
     MD_MARK* opener = &ctx->marks[mark_index];
-    int closer_index = mark_index + 1;
+    int32_t closer_index = mark_index + 1;
     MD_MARK* closer = &ctx->marks[closer_index];
     MD_MARK* next_resolved_mark;
     OFF off = opener->end;
@@ -3916,10 +3915,10 @@ md_analyze_permissive_url_autolink(MD_CTX* ctx, int mark_index)
  * here. Actually any non-alphanumeric characters with exception of '.'
  * are prohibited both in username and after '@'. */
 static void
-md_analyze_permissive_email_autolink(MD_CTX* ctx, int mark_index)
+md_analyze_permissive_email_autolink(MD_CTX* ctx, int32_t mark_index)
 {
     MD_MARK* opener = &ctx->marks[mark_index];
-    int closer_index;
+    int32_t closer_index;
     MD_MARK* closer;
     OFF beg = opener->beg;
     OFF end = opener->end;
@@ -3961,10 +3960,10 @@ md_analyze_permissive_email_autolink(MD_CTX* ctx, int mark_index)
 }
 
 static inline void
-md_analyze_marks(MD_CTX* ctx, const MD_LINE* lines, int n_lines,
-                 int mark_beg, int mark_end, const CHAR* mark_chars)
+md_analyze_marks(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines,
+                 int32_t mark_beg, int32_t mark_end, const CHAR* mark_chars)
 {
-    int i = mark_beg;
+    int32_t i = mark_beg;
     MD_UNUSED(lines);
     MD_UNUSED(n_lines);
 
@@ -4010,9 +4009,9 @@ md_analyze_marks(MD_CTX* ctx, const MD_LINE* lines, int n_lines,
 
 /* Analyze marks (build ctx->marks). */
 static int
-md_analyze_inlines(MD_CTX* ctx, const MD_LINE* lines, int n_lines, int table_mode)
+md_analyze_inlines(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines, int table_mode)
 {
-    int ret;
+    int ret = 0;
 
     /* Reset the previously collected stack of marks. */
     ctx->n_marks = 0;
@@ -4052,8 +4051,8 @@ abort:
 }
 
 static void
-md_analyze_link_contents(MD_CTX* ctx, const MD_LINE* lines, int n_lines,
-                         int mark_beg, int mark_end)
+md_analyze_link_contents(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines,
+                         int32_t mark_beg, int32_t mark_end)
 {
     int i;
 
@@ -4117,7 +4116,7 @@ abort:
 
 /* Render the output, accordingly to the analyzed ctx->marks. */
 static int
-md_process_inlines(MD_CTX* ctx, const MD_LINE* lines, int n_lines)
+md_process_inlines(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines)
 {
     MD_TEXTTYPE text_type;
     const MD_LINE* line = lines;
@@ -4407,7 +4406,7 @@ abort:
  ***************************/
 
 static void
-md_analyze_table_alignment(MD_CTX* ctx, OFF beg, OFF end, MD_ALIGN* align, int n_align)
+md_analyze_table_alignment(MD_CTX* ctx, OFF beg, OFF end, MD_ALIGN* align, int32_t n_align)
 {
     static const MD_ALIGN align_map[] = { MD_ALIGN_DEFAULT, MD_ALIGN_LEFT, MD_ALIGN_RIGHT, MD_ALIGN_CENTER };
     OFF off = beg;
@@ -4432,7 +4431,7 @@ md_analyze_table_alignment(MD_CTX* ctx, OFF beg, OFF end, MD_ALIGN* align, int n
 }
 
 /* Forward declaration. */
-static int md_process_normal_block_contents(MD_CTX* ctx, const MD_LINE* lines, int n_lines);
+static int md_process_normal_block_contents(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines);
 
 static int
 md_process_table_cell(MD_CTX* ctx, MD_BLOCKTYPE cell_type, MD_ALIGN align, OFF beg, OFF end)
@@ -4517,10 +4516,10 @@ abort:
 }
 
 static int
-md_process_table_block_contents(MD_CTX* ctx, int col_count, const MD_LINE* lines, int n_lines)
+md_process_table_block_contents(MD_CTX* ctx, int col_count, const MD_LINE* lines, int32_t n_lines)
 {
     MD_ALIGN* align;
-    int i;
+    int32_t i;
     int ret = 0;
 
     /* At least two lines have to be present: The column headers and the line
@@ -4581,7 +4580,7 @@ struct MD_BLOCK_tag {
      * MD_BLOCK_LI:     Task mark offset in the input doc.
      * MD_BLOCK_OL:     Start item number.
      */
-    unsigned n_lines;
+    uint32_t n_lines;
 };
 
 struct MD_CONTAINER_tag {
@@ -4597,10 +4596,10 @@ struct MD_CONTAINER_tag {
 
 
 static int
-md_process_normal_block_contents(MD_CTX* ctx, const MD_LINE* lines, int n_lines)
+md_process_normal_block_contents(MD_CTX* ctx, const MD_LINE* lines, int32_t n_lines)
 {
-    int i;
-    int ret;
+    int32_t i;
+    int ret = 0;
 
     MD_CHECK(md_analyze_inlines(ctx, lines, n_lines, FALSE));
     MD_CHECK(md_process_inlines(ctx, lines, n_lines));
@@ -4616,12 +4615,12 @@ abort:
 }
 
 static int
-md_process_verbatim_block_contents(MD_CTX* ctx, MD_TEXTTYPE text_type, const MD_VERBATIMLINE* lines, int n_lines)
+md_process_verbatim_block_contents(MD_CTX* ctx, MD_TEXTTYPE text_type, const MD_VERBATIMLINE* lines, int32_t n_lines)
 {
     static const CHAR indent_chunk_str[] = _T("                ");
     static const SZ indent_chunk_size = SIZEOF_ARRAY(indent_chunk_str) - 1;
 
-    int i;
+    int32_t i;
     int ret = 0;
 
     for(i = 0; i < n_lines; i++) {
@@ -4650,7 +4649,7 @@ abort:
 }
 
 static int
-md_process_code_block_contents(MD_CTX* ctx, int is_fenced, const MD_VERBATIMLINE* lines, int n_lines)
+md_process_code_block_contents(MD_CTX* ctx, int is_fenced, const MD_VERBATIMLINE* lines, int32_t n_lines)
 {
     if(is_fenced) {
         /* Skip the first line in case of fenced code: It is the fence.
@@ -4803,7 +4802,7 @@ abort:
 static int
 md_process_all_blocks(MD_CTX* ctx)
 {
-    int byte_off = 0;
+    int32_t byte_off = 0;
     int ret = 0;
 
     /* ctx->containers now is not needed for detection of lists and list items
@@ -4889,7 +4888,7 @@ abort:
  ************************************/
 
 static void*
-md_push_block_bytes(MD_CTX* ctx, int n_bytes)
+md_push_block_bytes(MD_CTX* ctx, int32_t n_bytes)
 {
     void* ptr;
 
@@ -4979,13 +4978,13 @@ static int
 md_consume_link_reference_definitions(MD_CTX* ctx)
 {
     MD_LINE* lines = (MD_LINE*) (ctx->current_block + 1);
-    int n_lines = ctx->current_block->n_lines;
-    int n = 0;
+    int32_t n_lines = ctx->current_block->n_lines;
+    int32_t n = 0;
 
     /* Compute how many lines at the start of the block form one or more
      * reference definitions. */
     while(n < n_lines) {
-        int n_link_ref_lines;
+        int32_t n_link_ref_lines;
 
         n_link_ref_lines = md_is_link_reference_definition(ctx,
                                     lines + n, n_lines - n);
@@ -5043,7 +5042,7 @@ md_end_current_block(MD_CTX* ctx)
     }
 
     if(ctx->current_block->type == MD_BLOCK_H  &&  (ctx->current_block->flags & MD_BLOCK_SETEXT_HEADER)) {
-        int n_lines = ctx->current_block->n_lines;
+        int32_t n_lines = ctx->current_block->n_lines;
 
         if(n_lines > 1) {
             /* Get rid of the underline. */
@@ -5095,7 +5094,7 @@ md_add_line_into_current_block(MD_CTX* ctx, const MD_LINE_ANALYSIS* analysis)
 }
 
 static int
-md_push_container_bytes(MD_CTX* ctx, MD_BLOCKTYPE type, unsigned start,
+md_push_container_bytes(MD_CTX* ctx, MD_BLOCKTYPE type, uint32_t start,
                         unsigned data, unsigned flags)
 {
     MD_BLOCK* block;
@@ -5126,7 +5125,7 @@ static int
 md_is_hr_line(MD_CTX* ctx, OFF beg, OFF* p_end, OFF* p_killer)
 {
     OFF off = beg + 1;
-    int n = 1;
+    int32_t n = 1;
 
     while(off < ctx->size  &&  (CH(off) == CH(beg) || CH(off) == _T(' ') || CH(off) == _T('\t'))) {
         if(CH(off) == CH(beg))
@@ -5152,7 +5151,7 @@ md_is_hr_line(MD_CTX* ctx, OFF beg, OFF* p_end, OFF* p_killer)
 static int
 md_is_atxheader_line(MD_CTX* ctx, OFF beg, OFF* p_beg, OFF* p_end, unsigned* p_level)
 {
-    int n;
+    int32_t n;
     OFF off = beg + 1;
 
     while(off < ctx->size  &&  CH(off) == _T('#')  &&  off - beg < 7)
@@ -5552,9 +5551,9 @@ md_push_container(MD_CTX* ctx, const MD_CONTAINER* container)
 }
 
 static int
-md_enter_child_containers(MD_CTX* ctx, int n_children)
+md_enter_child_containers(MD_CTX* ctx, int32_t n_children)
 {
-    int i;
+    int32_t i;
     int ret = 0;
 
     for(i = ctx->n_containers - n_children; i < ctx->n_containers; i++) {
@@ -5599,7 +5598,7 @@ abort:
 }
 
 static int
-md_leave_child_containers(MD_CTX* ctx, int n_keep)
+md_leave_child_containers(MD_CTX* ctx, int32_t n_keep)
 {
     int ret = 0;
 
@@ -5725,9 +5724,9 @@ md_analyze_line(MD_CTX* ctx, OFF beg, OFF* p_end,
                 const MD_LINE_ANALYSIS* pivot_line, MD_LINE_ANALYSIS* line)
 {
     unsigned total_indent = 0;
-    int n_parents = 0;
-    int n_brothers = 0;
-    int n_children = 0;
+    int32_t n_parents = 0;
+    int32_t n_brothers = 0;
+    int32_t n_children = 0;
     MD_CONTAINER container = { 0 };
     int prev_line_has_list_loosening_effect = ctx->last_line_has_list_loosening_effect;
     OFF off = beg;
@@ -5863,7 +5862,7 @@ md_analyze_line(MD_CTX* ctx, OFF beg, OFF* p_end,
                  */
                 if(n_parents > 0  &&  ctx->containers[n_parents-1].ch != _T('>')  &&
                    n_brothers + n_children == 0  &&  ctx->current_block == NULL  &&
-                   ctx->n_block_bytes > (int) sizeof(MD_BLOCK))
+                   ctx->n_block_bytes > sizeof(MD_BLOCK))
                 {
                     MD_BLOCK* top_block = (MD_BLOCK*) ((char*)ctx->block_bytes + ctx->n_block_bytes - sizeof(MD_BLOCK));
                     if(top_block->type == MD_BLOCK_LI)
@@ -5882,7 +5881,7 @@ md_analyze_line(MD_CTX* ctx, OFF beg, OFF* p_end,
             if(ctx->last_list_item_starts_with_two_blank_lines) {
                 if(n_parents > 0  &&  ctx->containers[n_parents-1].ch != _T('>')  &&
                    n_brothers + n_children == 0  &&  ctx->current_block == NULL  &&
-                   ctx->n_block_bytes > (int) sizeof(MD_BLOCK))
+                   ctx->n_block_bytes > sizeof(MD_BLOCK))
                 {
                     MD_BLOCK* top_block = (MD_BLOCK*) ((char*)ctx->block_bytes + ctx->n_block_bytes - sizeof(MD_BLOCK));
                     if(top_block->type == MD_BLOCK_LI)
@@ -6309,20 +6308,20 @@ abort:
     /* Output some memory consumption statistics. */
     {
         char buffer[256];
-        sprintf(buffer, "Alloced %u bytes for block buffer.",
-                    (unsigned)(ctx->alloc_block_bytes));
+        sprintf(buffer, "Alloced %ul bytes for block buffer.",
+                    (uint32_t)(ctx->alloc_block_bytes));
         MD_LOG(buffer);
 
-        sprintf(buffer, "Alloced %u bytes for containers buffer.",
-                    (unsigned)(ctx->alloc_containers * sizeof(MD_CONTAINER)));
+        sprintf(buffer, "Alloced %ul bytes for containers buffer.",
+                    (uint32_t)(ctx->alloc_containers * sizeof(MD_CONTAINER)));
         MD_LOG(buffer);
 
-        sprintf(buffer, "Alloced %u bytes for marks buffer.",
-                    (unsigned)(ctx->alloc_marks * sizeof(MD_MARK)));
+        sprintf(buffer, "Alloced %ul bytes for marks buffer.",
+                    (uint32_t)(ctx->alloc_marks * sizeof(MD_MARK)));
         MD_LOG(buffer);
 
-        sprintf(buffer, "Alloced %u bytes for aux. buffer.",
-                    (unsigned)(ctx->alloc_buffer * sizeof(MD_CHAR)));
+        sprintf(buffer, "Alloced %ul bytes for aux. buffer.",
+                    (uint32_t)(ctx->alloc_buffer * sizeof(MD_CHAR)));
         MD_LOG(buffer);
     }
 #endif
@@ -6360,7 +6359,7 @@ md_parse(const MD_CHAR* text, MD_SIZE size, const MD_PARSER* parser, void* userd
     ctx.doc_ends_with_newline = (size > 0  &&  ISNEWLINE_(text[size-1]));
 
     /* Reset all unresolved opener mark chains. */
-    for(i = 0; i < (int) SIZEOF_ARRAY(ctx.mark_chains); i++) {
+    for(i = 0; i < SIZEOF_ARRAY(ctx.mark_chains); i++) {
         ctx.mark_chains[i].head = -1;
         ctx.mark_chains[i].tail = -1;
     }

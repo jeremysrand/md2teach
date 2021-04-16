@@ -10,6 +10,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,18 +18,14 @@
 
 #pragma memorymodel 1
 
-// GS_TODO - Scan all of the code looking at uses of int and unsigned and
-// consider changing them to long and unsigned long if they need to use
-// numbers > 64K.
-
 // GS_TODO - How big does the stack need to be?  In looking over the code,
 // I don't see massive stack frames due to large globals (other than the
 // context which I made static).  But I do see lots of arguments and if
 // the call stack gets deep enough, we could have a problem.
 //
 // Testing looks pretty good though with a trivial input.  The stack seems
-// to be less that 256 bytes deep when the hook functions are called.  I
-// suspect things can get much worse with a complex document but this
+// to reach just more than 512 bytes deep when the hook functions are called.
+// I suspect things can get much worse with a complex document but this
 // approach should let me measure the worst case stack with a complex
 // document.
 //
