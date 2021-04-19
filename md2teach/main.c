@@ -59,7 +59,10 @@ MD_PARSER parser = {
 
 void * lowestStackSeen;
 char * commandName;
-int indentLevel = 0;
+int debugIndentLevel = 0;
+int debugEnabled = 0;
+
+FILE * outputFile;
 
 
 // Implementation
@@ -72,51 +75,66 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
     
     switch (type) {
         case MD_BLOCK_DOC:
-            printf("%*sDOC {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sDOC {\n", debugIndentLevel, "");
             break;
             
         case MD_BLOCK_QUOTE:
-            printf("%*sQUOTE {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sQUOTE {\n", debugIndentLevel, "");
+            fprintf(outputFile, "\r");
             break;
             
         case MD_BLOCK_UL: {
             MD_BLOCK_UL_DETAIL * ulDetail = (MD_BLOCK_UL_DETAIL *)detail;
-            printf("%*sUL (is_tight=%d, mark=%c) {\n", indentLevel, "", ulDetail->is_tight, ulDetail->mark);
+            if (debugEnabled)
+                fprintf(stderr, "%*sUL (is_tight=%d, mark=%c) {\n", debugIndentLevel, "", ulDetail->is_tight, ulDetail->mark);
             break;
         }
             
         case MD_BLOCK_OL: {
             MD_BLOCK_OL_DETAIL * olDetail = (MD_BLOCK_OL_DETAIL *)detail;
-            printf("%*sOL (start=%u, is_tight=%d, mark_delimiter=%c) {\n", indentLevel, "", olDetail->start, olDetail->is_tight, olDetail->mark_delimiter);
+            if (debugEnabled)
+                fprintf(stderr, "%*sOL (start=%u, is_tight=%d, mark_delimiter=%c) {\n", debugIndentLevel, "", olDetail->start, olDetail->is_tight, olDetail->mark_delimiter);
             break;
         }
             
         case MD_BLOCK_LI:
-            printf("%*sLI {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sLI {\n", debugIndentLevel, "");
             break;
             
         case MD_BLOCK_HR:
-            printf("%*sHR {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sHR {\n", debugIndentLevel, "");
+            fprintf(outputFile, "\r");
             break;
             
         case MD_BLOCK_H: {
             MD_BLOCK_H_DETAIL * hDetail = (MD_BLOCK_H_DETAIL *)detail;
-            printf("%*sH (level=%u) {\n", indentLevel, "", hDetail->level);
+            if (debugEnabled)
+                fprintf(stderr, "%*sH (level=%u) {\n", debugIndentLevel, "", hDetail->level);
             break;
         }
             
         case MD_BLOCK_CODE: {
             MD_BLOCK_CODE_DETAIL * codeDetail = (MD_BLOCK_CODE_DETAIL *)detail;
-            printf("%*sCODE ", indentLevel, "");
-            if (codeDetail->fence_char != '\0') {
-                printf("(fence_char=%c) ", codeDetail->fence_char);
+            if (debugEnabled) {
+                fprintf(stderr, "%*sCODE ", debugIndentLevel, "");
+                if (codeDetail->fence_char != '\0') {
+                    fprintf(stderr, "(fence_char=%c) ", codeDetail->fence_char);
+                }
+                fprintf(stderr, "{\n");
             }
-            printf("{\n");
+            
+            fprintf(outputFile, "\r");
             break;
         }
             
         case MD_BLOCK_P:
-            printf("%*sP {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sP {\n", debugIndentLevel, "");
+            fprintf(outputFile, "\r");
             break;
             
         default:
@@ -125,7 +143,7 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
     }
     
-    indentLevel+=2;
+    debugIndentLevel+=2;
     return 0;
 }
 
@@ -156,12 +174,14 @@ static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
             
         case MD_BLOCK_H:
+            fprintf(outputFile, "\r");
             break;
             
         case MD_BLOCK_CODE:
             break;
             
         case MD_BLOCK_P:
+            fprintf(outputFile, "\r");
             break;
             
         default:
@@ -170,8 +190,9 @@ static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
     }
     
-    indentLevel-=2;
-    printf("%*s}\n", indentLevel, "");
+    debugIndentLevel-=2;
+    if (debugEnabled)
+        fprintf(stderr, "%*s}\n", debugIndentLevel, "");
     
     return 0;
 }
@@ -185,23 +206,28 @@ static int enterSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
     
     switch (type) {
         case MD_SPAN_EM:
-            printf("%*sEM {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sEM {\n", debugIndentLevel, "");
             break;
             
         case MD_SPAN_STRONG:
-            printf("%*sSTRONG {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sSTRONG {\n", debugIndentLevel, "");
             break;
             
         case MD_SPAN_A:
-            printf("%*sA {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sA {\n", debugIndentLevel, "");
             break;
             
         case MD_SPAN_IMG:
-            printf("%*sIMG {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sIMG {\n", debugIndentLevel, "");
             break;
             
         case MD_SPAN_CODE:
-            printf("%*sCODE {\n", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sCODE {\n", debugIndentLevel, "");
             break;
             
         default:
@@ -210,7 +236,7 @@ static int enterSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
             break;
     }
     
-    indentLevel+=2;
+    debugIndentLevel+=2;
     return 0;
 }
 
@@ -243,8 +269,9 @@ static int leaveSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
             break;
     }
     
-    indentLevel-=2;
-    printf("%*s}\n", indentLevel, "");
+    debugIndentLevel-=2;
+    if (debugEnabled)
+        fprintf(stderr, "%*s}\n", debugIndentLevel, "");
     
     return 0;
 }
@@ -254,7 +281,8 @@ static int textHook(MD_TEXTTYPE type, const MD_CHAR * text, MD_SIZE size, void *
 {
     switch (type) {
         case MD_TEXT_NORMAL:
-            printf("%*sText: \"", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sText: \"", debugIndentLevel, "");
             break;
         
         case MD_TEXT_NULLCHAR:
@@ -262,15 +290,30 @@ static int textHook(MD_TEXTTYPE type, const MD_CHAR * text, MD_SIZE size, void *
             return 1;
             
         case MD_TEXT_BR:
+            if (debugEnabled)
+                fprintf(stderr, "%*sBR\n", debugIndentLevel, "");
+            putchar('\n');
+            return 0;
+            
         case MD_TEXT_SOFTBR:
+            if (debugEnabled)
+                fprintf(stderr, "%*sSOFT BR\n", debugIndentLevel, "");
             return 0;
             
         case MD_TEXT_ENTITY:
-            printf("%*sEntity: \"", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sEntity: \"", debugIndentLevel, "");
+            
+            // GS_TODO - For now, just skip printing anything but it would be best to look
+            // at the extended character map and do the "right thing" for special characters
+            // like the copyright symbol.
+            text = "";
+            size = 0;
             break;
             
         case MD_TEXT_CODE:
-            printf("%*sCode: \"", indentLevel, "");
+            if (debugEnabled)
+                fprintf(stderr, "%*sCode: \"", debugIndentLevel, "");
             break;
             
         default:
@@ -279,8 +322,13 @@ static int textHook(MD_TEXTTYPE type, const MD_CHAR * text, MD_SIZE size, void *
             break;
     }
     
-    fwrite(text, sizeof(MD_CHAR), size, stdout);
-    printf("\"\n");
+    if (debugEnabled) {
+        fwrite(text, sizeof(MD_CHAR), size, stderr);
+        fprintf(stderr, "\"\n");
+    }
+    
+    if (size > 0)
+        fwrite(text, sizeof(MD_CHAR), size, outputFile);
     
     return 0;
 }
@@ -288,7 +336,49 @@ static int textHook(MD_TEXTTYPE type, const MD_CHAR * text, MD_SIZE size, void *
 
 static void debugLogHook(const char * message, void * userdata)
 {
-    printf("DEBUG: %s\n", message);
+    if (debugEnabled)
+        fprintf(stderr, "DEBUG: %s\n", message);
+}
+
+
+static void printUsage(void)
+{
+    fprintf(stderr, "USAGE: %s [ -d ] inputfile outputfile\n", commandName);
+    exit(1);
+}
+
+
+static int parseArgs(int argc, char * argv[])
+{
+    commandName = argv[0];
+    
+    static int index;
+    static int charOffset;
+    static int optionLen;
+    
+    for (index = 1; index < argc; index++) {
+        if (argv[index][0] != '-')
+            break;
+        
+        optionLen = strlen(argv[index]);
+        for (charOffset = 1; charOffset < optionLen; charOffset++) {
+            switch (argv[index][charOffset]) {
+                case 'd':
+                    debugEnabled = 1;
+                    break;
+                
+                default:
+                    printUsage();
+                    break;
+            }
+        }
+    }
+    
+    if (index + 2 != argc) {
+        printUsage();
+    }
+    
+    return index;
 }
 
 
@@ -303,20 +393,23 @@ int main(int argc, char * argv[])
     
     static char * outputFileName;
     
+    static int index;
+    
     lowestStackSeen = &result;
     
-    if (argc != 3) {
-        fprintf(stderr, "USAGE: %s inputfile outputfile\n", argv[0]);
+    index = parseArgs(argc, argv);
+    inputFileName = argv[index];
+    outputFileName = argv[index + 1];
+    
+    outputFile = fopen(outputFileName, "w");
+    if (outputFile == NULL) {
+        fprintf(stderr, "%s: Unable to open output file %s, %s\n", commandName, outputFileName, strerror(errno));
         exit(1);
     }
     
-    commandName = argv[0];
-    inputFileName = argv[1];
-    outputFileName = argv[2];
-    
     inputFile = fopen(inputFileName, "r");
     if (inputFile == NULL) {
-        fprintf(stderr, "%s: Unable to open file %s, %s\n", commandName, inputFileName, strerror(errno));
+        fprintf(stderr, "%s: Unable to open input file %s, %s\n", commandName, inputFileName, strerror(errno));
         exit(1);
     }
     
@@ -355,8 +448,16 @@ int main(int argc, char * argv[])
     }
     
     result = md_parse(inputBuffer, inputFileLen, &parser, NULL);
-    printf("Parser result: %d\n", result);
-    printf("Most stack used: %lu\n", ((unsigned long)&result) - ((unsigned long)lowestStackSeen));
+    
+    putchar('\n');
+    
+    fclose(inputFile);
+    fclose(outputFile);
+    
+    if (debugEnabled) {
+        fprintf(stderr, "Parser result: %d\n", result);
+        fprintf(stderr, "Most stack used: %lu\n", ((unsigned long)&result) - ((unsigned long)lowestStackSeen));
+    }
     
     return 0;
 }

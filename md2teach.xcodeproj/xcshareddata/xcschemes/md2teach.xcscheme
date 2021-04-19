@@ -59,12 +59,20 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-d"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "$PROJECT_DIR/md2teach/test.md"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "outputfile"
+            argument = "$TARGET_BUILD_DIR/outfile.txt"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "blah"
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
