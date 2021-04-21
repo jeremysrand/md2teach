@@ -32,6 +32,21 @@
 // Leaving the stack very big for now at 32K.
 #pragma stacksize 32768
 
+// Typedefs
+
+typedef struct tBlockListItem
+{
+    MD_BLOCKTYPE type;
+    union {
+        MD_BLOCK_UL_DETAIL ulDetail;
+        MD_BLOCK_OL_DETAIL olDetail;
+        MD_BLOCK_H_DETAIL hDetail;
+        MD_BLOCK_CODE_DETAIL codeDetail;
+    } u;
+    int numTabs;
+    
+    struct tBlockListItem * next;
+} tBlockListItem;
 
 // Forward declarations
 
@@ -61,6 +76,9 @@ void * lowestStackSeen;
 char * commandName;
 int debugIndentLevel = 0;
 int debugEnabled = 0;
+int isFirstNonDocumentBlock = 1;
+
+tBlockListItem * blockList = NULL;
 
 FILE * outputFile;
 
@@ -69,6 +87,21 @@ FILE * outputFile;
 
 static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
 {
+    tBlockListItem * newBlock = malloc(sizeof(tBlockListItem));
+    
+    if (newBlock == NULL) {
+        fprintf(stderr, "%s: Out of memory", commandName);
+        return 1;
+    }
+    
+    newBlock->type = type;
+    if (blockList == NULL)
+        newBlock->numTabs = 0;
+    else
+        newBlock->numTabs = blockList->numTabs;
+    newBlock->next = blockList;
+    blockList = newBlock;
+    
     if ((detail != NULL) &&
         (detail < lowestStackSeen))
         lowestStackSeen = detail;
@@ -82,13 +115,19 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
         case MD_BLOCK_QUOTE:
             if (debugEnabled)
                 fprintf(stderr, "%*sQUOTE {\n", debugIndentLevel, "");
-            fprintf(outputFile, "\r");
+            
             break;
             
         case MD_BLOCK_UL: {
             MD_BLOCK_UL_DETAIL * ulDetail = (MD_BLOCK_UL_DETAIL *)detail;
             if (debugEnabled)
                 fprintf(stderr, "%*sUL (is_tight=%d, mark=%c) {\n", debugIndentLevel, "", ulDetail->is_tight, ulDetail->mark);
+            
+            memcpy(&(newBlock->u.ulDetail), ulDetail, sizeof(*ulDetail));
+            newBlock->numTabs++;
+            
+            if (!isFirstNonDocumentBlock)
+                fputc('\r', outputFile);
             break;
         }
             
@@ -96,24 +135,75 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             MD_BLOCK_OL_DETAIL * olDetail = (MD_BLOCK_OL_DETAIL *)detail;
             if (debugEnabled)
                 fprintf(stderr, "%*sOL (start=%u, is_tight=%d, mark_delimiter=%c) {\n", debugIndentLevel, "", olDetail->start, olDetail->is_tight, olDetail->mark_delimiter);
+            
+            memcpy(&(newBlock->u.olDetail), olDetail, sizeof(*olDetail));
+            newBlock->numTabs++;
+            
+            if (!isFirstNonDocumentBlock)
+                fputc('\r', outputFile);
             break;
         }
             
-        case MD_BLOCK_LI:
+        case MD_BLOCK_LI: {
+            int i;
+            tBlockListItem * enclosingBlock = newBlock->next;
+            int isNumbered = 0;
+            
             if (debugEnabled)
                 fprintf(stderr, "%*sLI {\n", debugIndentLevel, "");
-            break;
             
-        case MD_BLOCK_HR:
+            if (enclosingBlock == NULL) {
+                fprintf(stderr, "%s: Got a list item block without an enclosing block\n", commandName);
+                return 1;
+            }
+            
+            if (enclosingBlock->type == MD_BLOCK_OL) {
+                isNumbered = 1;
+                if ((!enclosingBlock->u.olDetail.is_tight) &&
+                    (!isFirstNonDocumentBlock))
+                    fputc('\r', outputFile);
+            } else if (enclosingBlock->type == MD_BLOCK_UL) {
+                if ((!enclosingBlock->u.ulDetail.is_tight) &&
+                    (!isFirstNonDocumentBlock))
+                    fputc('\r', outputFile);
+            }
+            
+            for (i = 0; i < newBlock->numTabs; i++)
+                fputc('\t', outputFile);
+            
+            if (isNumbered) {
+                fprintf(outputFile, "%u%c ", enclosingBlock->u.olDetail.start, enclosingBlock->u.olDetail.mark_delimiter);
+                enclosingBlock->u.olDetail.start++;
+            } else {
+                fprintf(outputFile, "%c ", 0xd7);    // 0xd7 is a diamond looking character which is good for a bullet
+            }
+            
+            break;
+        }
+            
+        case MD_BLOCK_HR: {
+            int i;
+            
             if (debugEnabled)
                 fprintf(stderr, "%*sHR {\n", debugIndentLevel, "");
-            fprintf(outputFile, "\r");
+            
+            if (!isFirstNonDocumentBlock)
+                fputc('\r', outputFile);
+            
+            for (i = 0; i < 30; i++)
+                fputc('_', outputFile);    // 0xd1 is a horizontal line
             break;
+        }
             
         case MD_BLOCK_H: {
             MD_BLOCK_H_DETAIL * hDetail = (MD_BLOCK_H_DETAIL *)detail;
             if (debugEnabled)
                 fprintf(stderr, "%*sH (level=%u) {\n", debugIndentLevel, "", hDetail->level);
+            
+            memcpy(&(newBlock->u.hDetail), hDetail, sizeof(*hDetail));
+            
+            if (!isFirstNonDocumentBlock)
+                fputc('\r', outputFile);
             break;
         }
             
@@ -127,14 +217,19 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
                 fprintf(stderr, "{\n");
             }
             
-            fprintf(outputFile, "\r");
+            memcpy(&(newBlock->u.codeDetail), codeDetail, sizeof(*codeDetail));
+            
+            if (!isFirstNonDocumentBlock)
+                fputc('\r', outputFile);
             break;
         }
             
         case MD_BLOCK_P:
             if (debugEnabled)
                 fprintf(stderr, "%*sP {\n", debugIndentLevel, "");
-            fprintf(outputFile, "\r");
+            
+            if (!isFirstNonDocumentBlock)
+                fputc('\r', outputFile);
             break;
             
         default:
@@ -143,6 +238,10 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
     }
     
+    
+    if (type != MD_BLOCK_DOC)
+        isFirstNonDocumentBlock = 0;
+    
     debugIndentLevel+=2;
     return 0;
 }
@@ -150,6 +249,21 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
 
 static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
 {
+    tBlockListItem * oldBlock = blockList;
+    
+    if (oldBlock == NULL) {
+        fprintf(stderr, "%s: Block list is empty but leaving block of type %d\n", commandName, (int)type);
+        return 1;
+    }
+    
+    if (oldBlock->type != type) {
+        fprintf(stderr, "%s: Expected to leave block of type %d but got type %d\n", commandName, (int)oldBlock->type, (int)type);
+        return 1;
+    }
+    
+    blockList = oldBlock->next;
+    free(oldBlock);
+    
     if ((detail != NULL) &&
         (detail < lowestStackSeen))
         lowestStackSeen = detail;
@@ -162,26 +276,31 @@ static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
             
         case MD_BLOCK_UL:
+            fputc('\r', outputFile);
             break;
             
         case MD_BLOCK_OL:
+            fputc('\r', outputFile);
             break;
             
         case MD_BLOCK_LI:
+            fputc('\r', outputFile);
             break;
             
         case MD_BLOCK_HR:
+            fputc('\r', outputFile);
             break;
             
         case MD_BLOCK_H:
-            fprintf(outputFile, "\r");
+            fputc('\r', outputFile);
             break;
             
         case MD_BLOCK_CODE:
+            fputc('\r', outputFile);
             break;
             
         case MD_BLOCK_P:
-            fprintf(outputFile, "\r");
+            fputc('\r', outputFile);
             break;
             
         default:

@@ -191,7 +191,9 @@ executeGUI: all
 	make/launchEmulator "$(DISKIMAGE)" "$(DESTBOOTIMAGE)"
 
 executeShell: all
-	$(ORCA) $(TARGETDIR)/$(PGM)
+	$(ORCA) $(TARGETDIR)/$(PGM) -d test.md $(TARGETDIR)/outfile.txt
+	make/createDiskImage "$(DISKIMAGE)" $(DESTBOOTIMAGE) "$(TARGETDIR)/outfile.txt"
+	make/launchEmulator "$(DISKIMAGE)" "$(DESTBOOTIMAGE)"
 
 $(OBJDIR)/%.a:	%.c
 	$(COMPILE) $< $(@:.a=) $(CFLAGS) --noroot

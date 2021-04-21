@@ -36,13 +36,14 @@
       selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
+      customWorkingDirectory = "$PROJECT_DIR/md2teach"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
       <PathRunnable
          runnableDebuggingMode = "0"
-         FilePath = "/usr/local/bin/orca">
+         FilePath = "/usr/bin/make">
       </PathRunnable>
       <MacroExpansion>
          <BuildableReference
@@ -55,24 +56,28 @@
       </MacroExpansion>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "$TARGET_BUILD_DIR/md2teach"
+            argument = "-C"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-d"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "$PROJECT_DIR/md2teach/test.md"
+            argument = "$PROJECT_DIR/md2teach"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "$TARGET_BUILD_DIR/outfile.txt"
+            argument = "TARGET_BUILD_DIR=$TARGET_BUILD_DIR"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "blah"
-            isEnabled = "NO">
+            argument = "DERIVED_SOURCES_DIR=$DERIVED_SOURCES_DIR"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "OBJECT_FILE_DIR=$OBJECT_FILE_DIR"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "execute"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
