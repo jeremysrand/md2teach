@@ -48,6 +48,12 @@ typedef struct tBlockListItem
     struct tBlockListItem * next;
 } tBlockListItem;
 
+typedef struct tEntity
+{
+    const char * entityString;
+    char entityChar;
+} tEntity;
+
 // Forward declarations
 
 static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata);
@@ -82,6 +88,10 @@ tBlockListItem * blockList = NULL;
 
 FILE * outputFile;
 
+tEntity entities[] = {
+    { "&copy;", 0xa9 }
+    // GS_TODO - Add more to the entity table to fill out the extended character set of the GS.
+};
 
 // Implementation
 
@@ -395,6 +405,24 @@ static int leaveSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
     return 0;
 }
 
+static void printEntity(const MD_CHAR * text, MD_SIZE size)
+{
+    int entityNum;
+    
+    for (entityNum = 0; entityNum < (sizeof(entities) / sizeof(entities[0])); entityNum++) {
+        int offset;
+        char * entityString = entities[entityNum].entityString;
+        
+        for (offset = 0; offset < size; offset++) {
+            if (tolower(text[offset]) != entityString[offset])
+                break;
+        }
+        if (offset >= size) {
+            fputc(entities[entityNum].entityChar, outputFile);
+            return;
+        }
+    }
+}
 
 static int textHook(MD_TEXTTYPE type, const MD_CHAR * text, MD_SIZE size, void * userdata)
 {
@@ -420,12 +448,12 @@ static int textHook(MD_TEXTTYPE type, const MD_CHAR * text, MD_SIZE size, void *
             return 0;
             
         case MD_TEXT_ENTITY:
-            if (debugEnabled)
+            if (debugEnabled) {
                 fprintf(stderr, "%*sEntity: \"", debugIndentLevel, "");
+                fwrite(text, sizeof(MD_CHAR), size, stderr);
+            }
             
-            // GS_TODO - For now, just skip printing anything but it would be best to look
-            // at the extended character map and do the "right thing" for special characters
-            // like the copyright symbol.
+            printEntity(text, size);
             text = "";
             size = 0;
             break;
