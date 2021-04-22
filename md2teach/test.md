@@ -29,7 +29,7 @@ fenced code
 [ref]: /url
 
 paragraph
-&copy; &#1234; &#xabcd;
+&#65;&#169;&xA9;&copy; &#1234; &#xabcd;
 `code`
 *emph* **strong** ***strong emph***
 _emph_ __strong__ ___strong emph___
