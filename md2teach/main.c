@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gsos.h>
+
 #include "md4c.h"
 
 #pragma memorymodel 1
@@ -87,7 +89,9 @@ int isFirstNonDocumentBlock = 1;
 
 tBlockListItem * blockList = NULL;
 
-FILE * outputFile;
+IORecGS writeRec;
+char writeBuffer[4096];
+int writeBufferOffset = 0;
 
 tEntity entities[] = {
     { "&Tab;", 0x9, 0x9 },
@@ -317,6 +321,34 @@ tEntity entities[] = {
 
 // Implementation
 
+void flushBuffer(void)
+{
+    writeRec.requestCount = writeBufferOffset;
+    WriteGS(&writeRec);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Error writing to output file\n", commandName);
+        exit(1);
+    }
+    writeBufferOffset = 0;
+}
+
+void writeChar(MD_CHAR ch)
+{
+    if (writeBufferOffset == sizeof(writeBuffer))
+        flushBuffer();
+    
+    writeBuffer[writeBufferOffset] = ch;
+    writeBufferOffset++;
+}
+
+void writeString(MD_CHAR * str, MD_SIZE size)
+{
+    MD_SIZE i;
+    
+    for (i = 0; i < size; i++)
+        writeChar(str[i]);
+}
+
 static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
 {
     tBlockListItem * newBlock = malloc(sizeof(tBlockListItem));
@@ -359,7 +391,7 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             newBlock->numTabs++;
             
             if (!isFirstNonDocumentBlock)
-                fputc('\r', outputFile);
+                writeChar('\r');
             break;
         }
             
@@ -372,7 +404,7 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             newBlock->numTabs++;
             
             if (!isFirstNonDocumentBlock)
-                fputc('\r', outputFile);
+                writeChar('\r');
             break;
         }
             
@@ -380,6 +412,7 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             int i;
             tBlockListItem * enclosingBlock = newBlock->next;
             int isNumbered = 0;
+            static char str[16];
             
             if (debugEnabled)
                 fprintf(stderr, "%*sLI {\n", debugIndentLevel, "");
@@ -393,22 +426,23 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
                 isNumbered = 1;
                 if ((!enclosingBlock->u.olDetail.is_tight) &&
                     (!isFirstNonDocumentBlock))
-                    fputc('\r', outputFile);
+                    writeChar('\r');
             } else if (enclosingBlock->type == MD_BLOCK_UL) {
                 if ((!enclosingBlock->u.ulDetail.is_tight) &&
                     (!isFirstNonDocumentBlock))
-                    fputc('\r', outputFile);
+                    writeChar('\r');
             }
             
             for (i = 0; i < newBlock->numTabs; i++)
-                fputc('\t', outputFile);
+                writeChar('\t');
             
             if (isNumbered) {
-                fprintf(outputFile, "%u%c ", enclosingBlock->u.olDetail.start, enclosingBlock->u.olDetail.mark_delimiter);
+                sprintf(str, "%u%c ", enclosingBlock->u.olDetail.start, enclosingBlock->u.olDetail.mark_delimiter);
                 enclosingBlock->u.olDetail.start++;
             } else {
-                fprintf(outputFile, "%c ", 0xa5);    // 0xa5 is a bullet character
+                sprintf(str, "%c ", 0xa5);    // 0xa5 is a bullet character
             }
+            writeString(str, strlen(str));
             
             break;
         }
@@ -420,10 +454,10 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
                 fprintf(stderr, "%*sHR {\n", debugIndentLevel, "");
             
             if (!isFirstNonDocumentBlock)
-                fputc('\r', outputFile);
+                writeChar('\r');
             
             for (i = 0; i < 30; i++)
-                fputc('_', outputFile);    // 0xd1 is a horizontal line
+                writeChar('_');
             break;
         }
             
@@ -435,7 +469,7 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             memcpy(&(newBlock->u.hDetail), hDetail, sizeof(*hDetail));
             
             if (!isFirstNonDocumentBlock)
-                fputc('\r', outputFile);
+                writeChar('\r');
             break;
         }
             
@@ -452,7 +486,7 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             memcpy(&(newBlock->u.codeDetail), codeDetail, sizeof(*codeDetail));
             
             if (!isFirstNonDocumentBlock)
-                fputc('\r', outputFile);
+                writeChar('\r');
             break;
         }
             
@@ -461,7 +495,7 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
                 fprintf(stderr, "%*sP {\n", debugIndentLevel, "");
             
             if (!isFirstNonDocumentBlock)
-                fputc('\r', outputFile);
+                writeChar('\r');
             break;
             
         default:
@@ -508,31 +542,31 @@ static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
             
         case MD_BLOCK_UL:
-            fputc('\r', outputFile);
+            writeChar('\r');
             break;
             
         case MD_BLOCK_OL:
-            fputc('\r', outputFile);
+            writeChar('\r');
             break;
             
         case MD_BLOCK_LI:
-            fputc('\r', outputFile);
+            writeChar('\r');
             break;
             
         case MD_BLOCK_HR:
-            fputc('\r', outputFile);
+            writeChar('\r');
             break;
             
         case MD_BLOCK_H:
-            fputc('\r', outputFile);
+            writeChar('\r');
             break;
             
         case MD_BLOCK_CODE:
-            fputc('\r', outputFile);
+            writeChar('\r');
             break;
             
         case MD_BLOCK_P:
-            fputc('\r', outputFile);
+            writeChar('\r');
             break;
             
         default:
@@ -648,7 +682,7 @@ static void printEntity(const MD_CHAR * text, MD_SIZE size)
             unicodeChar = 0;
         if ((unicodeChar > 0) &&
             (unicodeChar < 128)) {
-            fputc(unicodeChar, outputFile);
+            writeChar(unicodeChar);
             return;
         }
     }
@@ -660,7 +694,7 @@ static void printEntity(const MD_CHAR * text, MD_SIZE size)
             unicodeChar = 0;
         if ((unicodeChar > 0) &&
             (unicodeChar < 128)) {
-            fputc(unicodeChar, outputFile);
+            writeChar(unicodeChar);
             return;
         }
     }
@@ -668,7 +702,7 @@ static void printEntity(const MD_CHAR * text, MD_SIZE size)
     for (entityNum = 0; entityNum < (sizeof(entities) / sizeof(entities[0])); entityNum++) {
         if ((unicodeChar == entities[entityNum].unicodeChar) ||
             (strncmp(entities[entityNum].entityString, text, size) == 0)) {
-            fputc(entities[entityNum].entityChar, outputFile);
+            writeChar(entities[entityNum].entityChar);
             return;
         }
     }
@@ -725,7 +759,7 @@ static int textHook(MD_TEXTTYPE type, const MD_CHAR * text, MD_SIZE size, void *
     }
     
     if (size > 0)
-        fwrite(text, sizeof(MD_CHAR), size, outputFile);
+        writeString(text, size);
     
     return 0;
 }
@@ -787,8 +821,11 @@ int main(int argc, char * argv[])
     static FILE * inputFile;
     static long inputFileLen;
     static char * inputBuffer;
-    
-    static char * outputFileName;
+
+    static GSString255 outputFileName;
+    static OpenRecGS openRec;
+    static SetPositionRecGS setEofRec;
+    static RefNumRecGS closeRec;
     
     static int index;
     
@@ -796,13 +833,41 @@ int main(int argc, char * argv[])
     
     index = parseArgs(argc, argv);
     inputFileName = argv[index];
-    outputFileName = argv[index + 1];
     
-    outputFile = fopen(outputFileName, "w");
-    if (outputFile == NULL) {
-        fprintf(stderr, "%s: Unable to open output file %s, %s\n", commandName, outputFileName, strerror(errno));
+    outputFileName.length = strlen(argv[index + 1]);
+    if (outputFileName.length >= sizeof(outputFileName.text)) {
+        fprintf(stderr, "%s: Output file path too long, %s\n", commandName, outputFileName);
         exit(1);
     }
+    strcpy(outputFileName.text, argv[index + 1]);
+    
+    openRec.pCount = 7;
+    openRec.refNum = 0;
+    openRec.pathname = &outputFileName;
+    openRec.requestAccess = writeEnable;
+    openRec.resourceNumber = 0;
+    openRec.access = destroyEnable | renameEnable | readWriteEnable;
+    openRec.fileType = 0x04; // This is for text, it is 0x50 for Teach
+    openRec.auxType = 0x0000;
+    OpenGS(&openRec);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to open output file %s\n", commandName, outputFileName.text);
+        exit(1);
+    }
+    
+    setEofRec.pCount = 3;
+    setEofRec.refNum = openRec.refNum;
+    setEofRec.base = startPlus;
+    setEofRec.displacement = 0;
+    SetEOFGS(&setEofRec);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to truncate output file %s\n", commandName, outputFileName.text);
+        exit(1);
+    }
+    
+    writeRec.pCount = 4;
+    writeRec.refNum = openRec.refNum;
+    writeRec.dataBuffer = writeBuffer;
     
     inputFile = fopen(inputFileName, "r");
     if (inputFile == NULL) {
@@ -846,10 +911,15 @@ int main(int argc, char * argv[])
     
     result = md_parse(inputBuffer, inputFileLen, &parser, NULL);
     
+    if (writeBufferOffset > 0)
+        flushBuffer();
+    closeRec.pCount = 1;
+    closeRec.refNum = openRec.refNum;
+    CloseGS(&closeRec);
+    
     putchar('\n');
     
     fclose(inputFile);
-    fclose(outputFile);
     
     if (debugEnabled) {
         fprintf(stderr, "Parser result: %d\n", result);
