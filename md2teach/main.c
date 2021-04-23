@@ -15,6 +15,8 @@
 #include <string.h>
 
 #include <gsos.h>
+#include <resources.h>
+#include <textedit.h>
 
 #include "md4c.h"
 
@@ -33,6 +35,20 @@
 //
 // Leaving the stack very big for now at 32K.
 #pragma stacksize 32768
+
+// Defines
+
+#define NUM_HEADER_SIZES 6
+
+// This is plain, emphasized, strong or strong+empasized
+#define NUM_TEXT_FORMATS 4
+
+#define NUM_HEADER_STYLES (NUM_HEADER_SIZES * NUM_TEXT_FORMATS)
+#define NUM_CODE_STYLES 1
+#define NUM_TEXT_STYLES NUM_TEXT_FORMATS
+#define NUM_QUOTE_STYLES NUM_TEXT_FORMATS
+
+#define TOTAL_STYLES (NUM_HEADER_STYLES + NUM_CODE_STYLES + NUM_TEXT_STYLES + NUM_QUOTE_STYLES)
 
 // Typedefs
 
@@ -56,6 +72,49 @@ typedef struct tEntity
     char entityChar;
     uint32_t unicodeChar;
 } tEntity;
+
+typedef struct tWindowPos
+{
+    int16_t height;
+    int16_t width;
+    int16_t top;
+    int16_t left;
+    int32_t version;
+} tWindowPos;
+
+// I wish I could use the structure definition from textedit.h but TERuler contains optional
+// fields in the definition and Teach isn't expecting them it seems (array of theTabs).  So,
+// I need my own struct which omits them.
+typedef struct tRuler
+{
+    int16_t leftMargin;
+    int16_t leftIndent;
+    int16_t rightMargin;
+    int16_t just;
+    int16_t extraLS;
+    int16_t flags;
+    int32_t userData;
+    int16_t tabType;
+    int16_t tabTerminator;
+} tRuler;
+
+typedef struct tFormatHeader
+{
+    int16_t version;
+    int32_t rulerSize;
+    tRuler ruler;
+    int32_t styleListLength;
+    TEStyle styleList[TOTAL_STYLES];
+    LongWord numberOfStyles;
+} tFormatHeader;
+
+typedef struct tFormat
+{
+    tFormatHeader header;
+    StyleItem styleItems[1];
+} tFormat;
+
+//typedef struct tStyle
 
 // Forward declarations
 
@@ -92,6 +151,32 @@ tBlockListItem * blockList = NULL;
 IORecGS writeRec;
 char writeBuffer[4096];
 int writeBufferOffset = 0;
+
+tWindowPos windowPos = {
+    0xad,   // height
+    0x27c,  // width
+    0x1a,   // top
+    0x02,   // left
+    0x0     // version
+};
+
+// For the 6 header sizes, we are going with:
+//      1 -> Helvetica 36
+//      2 -> Helvetica 30
+//      3 -> Helvetica 27
+//      4 -> Helvetica 24
+//      5 -> Helvetica 20
+//      6 -> Helvetica 18
+uint8_t headerFontSizes[NUM_HEADER_SIZES] = {
+    36,
+    30,
+    27,
+    24,
+    20,
+    18
+};
+
+tFormat * formatPtr = NULL;
 
 tEntity entities[] = {
     { "&Tab;", 0x9, 0x9 },
@@ -337,6 +422,8 @@ void writeChar(MD_CHAR ch)
     if (writeBufferOffset == sizeof(writeBuffer))
         flushBuffer();
     
+    if (ch == '\n')
+        ch = '\r';
     writeBuffer[writeBufferOffset] = ch;
     writeBufferOffset++;
 }
@@ -823,8 +910,9 @@ int main(int argc, char * argv[])
     static char * inputBuffer;
 
     static GSString255 outputFileName;
+    static CreateRecGS createRec;
+    static NameRecGS destroyRec;
     static OpenRecGS openRec;
-    static SetPositionRecGS setEofRec;
     static RefNumRecGS closeRec;
     
     static int index;
@@ -841,27 +929,29 @@ int main(int argc, char * argv[])
     }
     strcpy(outputFileName.text, argv[index + 1]);
     
-    openRec.pCount = 7;
-    openRec.refNum = 0;
-    openRec.pathname = &outputFileName;
-    openRec.requestAccess = writeEnable;
-    openRec.resourceNumber = 0;
-    openRec.access = destroyEnable | renameEnable | readWriteEnable;
-    openRec.fileType = 0x04; // This is for text, it is 0x50 for Teach
-    openRec.auxType = 0x0000;
-    OpenGS(&openRec);
+    destroyRec.pCount = 1;
+    destroyRec.pathname = &outputFileName;
+    DestroyGS(&destroyRec);
+    
+    createRec.pCount = 7;
+    createRec.pathname = &outputFileName;
+    createRec.access = destroyEnable | renameEnable | readWriteEnable;
+    createRec.fileType = 0x50; // Type for Teach file
+    createRec.auxType = 0x5445; // Aux type for Teach file
+    createRec.storageType = extendedFile;
+    CreateGS(&createRec);
     if (toolerror()) {
-        fprintf(stderr, "%s: Unable to open output file %s\n", commandName, outputFileName.text);
+        fprintf(stderr, "%s: Unable to create output file %s\n", commandName, outputFileName.text);
         exit(1);
     }
     
-    setEofRec.pCount = 3;
-    setEofRec.refNum = openRec.refNum;
-    setEofRec.base = startPlus;
-    setEofRec.displacement = 0;
-    SetEOFGS(&setEofRec);
+    openRec.pCount = 3;
+    openRec.refNum = 0;
+    openRec.pathname = &outputFileName;
+    openRec.requestAccess = writeEnable;
+    OpenGS(&openRec);
     if (toolerror()) {
-        fprintf(stderr, "%s: Unable to truncate output file %s\n", commandName, outputFileName.text);
+        fprintf(stderr, "%s: Unable to open output file %s\n", commandName, outputFileName.text);
         exit(1);
     }
     
