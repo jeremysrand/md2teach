@@ -1,6 +1,5 @@
 #!/bin/sh
 
-set -
 if [ $# -lt 3 ]
 then
     echo USAGE: $0 diskimage bootimage file [bootdest]
@@ -42,9 +41,25 @@ else
     CPARGS="--preserve=xattr"
 fi
 
+unmount()
+{
+    RETRIES=0
+    while [ $RETRIES -lt 5 ]
+    do
+        umount "$1"
+        if [ $? -eq 0 ]
+        then
+            break
+        fi
+
+        RETRIES=`expr $RETRIES + 1`
+        sleep 1
+    done
+}
+
 cleanupAndExit()
 {
-    umount "$MOUNTDIR" 2> /dev/null
+    unmount "$MOUNTDIR" 2> /dev/null
     rm -f "$TMPDISKIMAGE" 2> /dev/null
     rm -f "$TMPBOOTIMAGE" 2> /dev/null
     rm -f "$TMPARCHIVE" 2> /dev/null
@@ -128,18 +143,7 @@ then
         cd "$OLDDIR"
     done
 
-    RETRIES=0
-    while [ $RETRIES -lt 5 ]
-    do
-        umount "$MOUNTDIR"
-        if [ $? -eq 0 ]
-        then
-        break
-        fi
-
-        RETRIES=`expr $RETRIES + 1`
-        sleep 1
-    done
+    unmount "$MOUNTDIR"
 
     if [ $RETRIES -ge 5 ]
     then
@@ -201,18 +205,7 @@ then
 fi
 cd "$OLDDIR"
 
-RETRIES=0
-while [ $RETRIES -lt 5 ]
-do
-    umount "$MOUNTDIR"
-    if [ $? -eq 0 ]
-    then
-        break
-    fi
-
-    RETRIES=`expr $RETRIES + 1`
-    sleep 1
-done
+unmount "$MOUNTDIR"
 
 if [ $RETRIES -ge 5 ]
 then

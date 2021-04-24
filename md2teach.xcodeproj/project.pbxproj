@@ -16,6 +16,8 @@
 		9D6532FA2626240800105D50 /* tail.mk in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532F92626240800105D50 /* tail.mk */; };
 		9D6532FD2626240800105D50 /* md2teach.xcscheme in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532FC2626240800105D50 /* md2teach.xcscheme */; };
 		9D65330D2626246700105D50 /* md4c.c in Sources */ = {isa = PBXBuildFile; fileRef = 9D65330C2626246700105D50 /* md4c.c */; };
+		9D8125DD2634A584002F05F5 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 9D8125DC2634A584002F05F5 /* io.c */; };
+		9D8125E42634AC4A002F05F5 /* translate.c in Sources */ = {isa = PBXBuildFile; fileRef = 9D8125E32634AC4A002F05F5 /* translate.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -49,6 +51,11 @@
 		9D6532FC2626240800105D50 /* md2teach.xcscheme */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = md2teach.xcscheme; path = ../../md2teach.xcodeproj/xcshareddata/xcschemes/md2teach.xcscheme; sourceTree = "<group>"; };
 		9D65330B2626246700105D50 /* md4c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md4c.h; sourceTree = "<group>"; };
 		9D65330C2626246700105D50 /* md4c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = md4c.c; sourceTree = "<group>"; };
+		9D8125DA2634A539002F05F5 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		9D8125DB2634A584002F05F5 /* io.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = io.h; sourceTree = "<group>"; };
+		9D8125DC2634A584002F05F5 /* io.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = io.c; sourceTree = "<group>"; };
+		9D8125E22634AC4A002F05F5 /* translate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = translate.h; sourceTree = "<group>"; };
+		9D8125E32634AC4A002F05F5 /* translate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = translate.c; sourceTree = "<group>"; };
 		9DDFC7B026269D23006D6E71 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		9DDFC7B126269D3F006D6E71 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9DDFC7B42627E081006D6E71 /* test.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = test.md; sourceTree = "<group>"; };
@@ -94,6 +101,11 @@
 			isa = PBXGroup;
 			children = (
 				9D6532EC2626240800105D50 /* main.c */,
+				9D8125DA2634A539002F05F5 /* main.h */,
+				9D8125DB2634A584002F05F5 /* io.h */,
+				9D8125DC2634A584002F05F5 /* io.c */,
+				9D8125E22634AC4A002F05F5 /* translate.h */,
+				9D8125E32634AC4A002F05F5 /* translate.c */,
 				9D65330C2626246700105D50 /* md4c.c */,
 				9D65330B2626246700105D50 /* md4c.h */,
 				9D6532EE2626240800105D50 /* Makefile */,
@@ -224,7 +236,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D8125E42634AC4A002F05F5 /* translate.c in Sources */,
 				9D6532EF2626240800105D50 /* Makefile in Sources */,
+				9D8125DD2634A584002F05F5 /* io.c in Sources */,
 				9D6532ED2626240800105D50 /* main.c in Sources */,
 				9D65330D2626246700105D50 /* md4c.c in Sources */,
 			);
