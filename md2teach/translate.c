@@ -12,6 +12,7 @@
 #include "translate.h"
 #include "io.h"
 #include "main.h"
+#include "style.h"
 
 
 // Typedefs
@@ -720,5 +721,14 @@ static void debugLogHook(const char * message, void * userdata)
 
 int parse(const MD_CHAR* text, MD_SIZE size)
 {
-    return md_parse(text, size, &parser, NULL);
+    int result;
+    
+    if (styleInit() != 0)
+        return 1;
+    
+    result = md_parse(text, size, &parser, NULL);
+    
+    closeStyle();
+    
+    return result;
 }

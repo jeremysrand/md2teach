@@ -22,6 +22,7 @@
 static IORecGS writeRec;
 static char writeBuffer[4096];
 static int32_t writeBufferOffset = 0;
+static MD_SIZE writePos = 0;
 
 
 // Implementation
@@ -94,6 +95,7 @@ void writeChar(MD_CHAR ch)
         ch = '\r';
     writeBuffer[writeBufferOffset] = ch;
     writeBufferOffset++;
+    writePos++;
 }
 
 
@@ -103,6 +105,12 @@ void writeString(const MD_CHAR * str, MD_SIZE size)
     
     for (i = 0; i < size; i++)
         writeChar(str[i]);
+}
+
+
+MD_SIZE outputPos(void)
+{
+    return writePos;
 }
 
 
