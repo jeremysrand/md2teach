@@ -34,6 +34,7 @@ typedef struct tBlockListItem
         MD_BLOCK_CODE_DETAIL codeDetail;
     } u;
     int numTabs;
+    tStyleType styleType;
     
     struct tBlockListItem * next;
 } tBlockListItem;
@@ -66,6 +67,8 @@ static MD_PARSER parser = {
 static int debugIndentLevel = 0;
 
 static tBlockListItem * blockList = NULL;
+
+static uint16_t textStyleMask = STYLE_TEXT_PLAIN;
 
 static tEntity entities[] = {
     { "&Tab;", 0x9, 0x9 },
@@ -298,6 +301,8 @@ static tEntity entities[] = {
 static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
 {
     static int isFirstNonDocumentBlock = 1;
+    int shouldInsertCR = 1;
+    uint16_t headerSize = 0;
     tBlockListItem * newBlock = malloc(sizeof(tBlockListItem));
     
     if (newBlock == NULL) {
@@ -306,10 +311,15 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
     }
     
     newBlock->type = type;
-    if (blockList == NULL)
+    if (blockList == NULL) {
         newBlock->numTabs = 0;
-    else
+        newBlock->styleType = STYLE_TYPE_TEXT;
+    } else {
         newBlock->numTabs = blockList->numTabs;
+        if (blockList->styleType == STYLE_TYPE_QUOTE)
+            newBlock->styleType = STYLE_TYPE_QUOTE;
+        newBlock->styleType = STYLE_TYPE_TEXT;
+    }
     newBlock->next = blockList;
     blockList = newBlock;
     
@@ -321,12 +331,15 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
         case MD_BLOCK_DOC:
             if (debugEnabled)
                 fprintf(stderr, "%*sDOC {\n", debugIndentLevel, "");
+            newBlock->styleType = STYLE_TYPE_TEXT;
+            shouldInsertCR = 0;
             break;
             
         case MD_BLOCK_QUOTE:
             if (debugEnabled)
                 fprintf(stderr, "%*sQUOTE {\n", debugIndentLevel, "");
-            
+            newBlock->styleType = STYLE_TYPE_QUOTE;
+            shouldInsertCR = 0;
             break;
             
         case MD_BLOCK_UL: {
@@ -336,9 +349,6 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             
             memcpy(&(newBlock->u.ulDetail), ulDetail, sizeof(*ulDetail));
             newBlock->numTabs++;
-            
-            if (!isFirstNonDocumentBlock)
-                writeChar('\r');
             break;
         }
             
@@ -349,17 +359,12 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             
             memcpy(&(newBlock->u.olDetail), olDetail, sizeof(*olDetail));
             newBlock->numTabs++;
-            
-            if (!isFirstNonDocumentBlock)
-                writeChar('\r');
             break;
         }
             
         case MD_BLOCK_LI: {
             int i;
             tBlockListItem * enclosingBlock = newBlock->next;
-            int isNumbered = 0;
-            static char str[16];
             
             if (debugEnabled)
                 fprintf(stderr, "%*sLI {\n", debugIndentLevel, "");
@@ -370,43 +375,18 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             }
             
             if (enclosingBlock->type == MD_BLOCK_OL) {
-                isNumbered = 1;
-                if ((!enclosingBlock->u.olDetail.is_tight) &&
-                    (!isFirstNonDocumentBlock))
-                    writeChar('\r');
+                shouldInsertCR = !enclosingBlock->u.olDetail.is_tight;
             } else if (enclosingBlock->type == MD_BLOCK_UL) {
-                if ((!enclosingBlock->u.ulDetail.is_tight) &&
-                    (!isFirstNonDocumentBlock))
-                    writeChar('\r');
+                shouldInsertCR = !enclosingBlock->u.ulDetail.is_tight;
             }
-            
-            for (i = 0; i < newBlock->numTabs; i++)
-                writeChar('\t');
-            
-            if (isNumbered) {
-                sprintf(str, "%u%c ", enclosingBlock->u.olDetail.start, enclosingBlock->u.olDetail.mark_delimiter);
-                enclosingBlock->u.olDetail.start++;
-            } else {
-                sprintf(str, "%c ", 0xa5);    // 0xa5 is a bullet character
-            }
-            writeString(str, strlen(str));
             
             break;
         }
             
-        case MD_BLOCK_HR: {
-            int i;
-            
+        case MD_BLOCK_HR:
             if (debugEnabled)
                 fprintf(stderr, "%*sHR {\n", debugIndentLevel, "");
-            
-            if (!isFirstNonDocumentBlock)
-                writeChar('\r');
-            
-            for (i = 0; i < 30; i++)
-                writeChar('_');
             break;
-        }
             
         case MD_BLOCK_H: {
             MD_BLOCK_H_DETAIL * hDetail = (MD_BLOCK_H_DETAIL *)detail;
@@ -414,9 +394,12 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
                 fprintf(stderr, "%*sH (level=%u) {\n", debugIndentLevel, "", hDetail->level);
             
             memcpy(&(newBlock->u.hDetail), hDetail, sizeof(*hDetail));
-            
+            setStyle(STYLE_TYPE_TEXT, textStyleMask, headerSize);
             if (!isFirstNonDocumentBlock)
                 writeChar('\r');
+            headerSize = hDetail->level;
+            shouldInsertCR = 0;
+            newBlock->styleType = STYLE_TYPE_HEADER;
             break;
         }
             
@@ -431,18 +414,13 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             }
             
             memcpy(&(newBlock->u.codeDetail), codeDetail, sizeof(*codeDetail));
-            
-            if (!isFirstNonDocumentBlock)
-                writeChar('\r');
+            newBlock->styleType = STYLE_TYPE_CODE;
             break;
         }
             
         case MD_BLOCK_P:
             if (debugEnabled)
                 fprintf(stderr, "%*sP {\n", debugIndentLevel, "");
-            
-            if (!isFirstNonDocumentBlock)
-                writeChar('\r');
             break;
             
         default:
@@ -451,10 +429,56 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
     }
     
+    setStyle(newBlock->styleType, textStyleMask, headerSize);
+    if ((!isFirstNonDocumentBlock) &&
+        (shouldInsertCR))
+        writeChar('\r');
     
+    switch (type) {
+        case MD_BLOCK_LI: {
+            int i;
+            tBlockListItem * enclosingBlock = newBlock->next;
+            static char str[16];
+
+            for (i = 0; i < newBlock->numTabs; i++)
+                writeChar('\t');
+            
+            if (enclosingBlock->type == MD_BLOCK_OL) {
+                sprintf(str, "%u%c ", enclosingBlock->u.olDetail.start, enclosingBlock->u.olDetail.mark_delimiter);
+                enclosingBlock->u.olDetail.start++;
+            } else {
+                sprintf(str, "%c ", 0xa5);    // 0xa5 is a bullet character
+            }
+            writeString(str, strlen(str));
+            break;
+        }
+            
+        case MD_BLOCK_HR: {
+            int i;
+            
+            for (i = 0; i < 30; i++)
+                writeChar('_');
+            break;
+        }
+            
+        case MD_BLOCK_DOC:
+        case MD_BLOCK_QUOTE:
+        case MD_BLOCK_UL:
+        case MD_BLOCK_OL:
+        case MD_BLOCK_H:
+        case MD_BLOCK_CODE:
+        case MD_BLOCK_P:
+            break;
+            
+        default:
+            fprintf(stderr, "%s: Invalid block type (%d)\n", commandName, (int)type);
+            return 1;
+            break;
+    }
+        
     if (type != MD_BLOCK_DOC)
         isFirstNonDocumentBlock = 0;
-    
+            
     debugIndentLevel+=2;
     return 0;
 }
@@ -522,6 +546,9 @@ static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
     }
     
+    if (blockList != NULL)
+        setStyle(blockList->styleType, textStyleMask, 0);
+    
     debugIndentLevel-=2;
     if (debugEnabled)
         fprintf(stderr, "%*s}\n", debugIndentLevel, "");
@@ -540,11 +567,17 @@ static int enterSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
         case MD_SPAN_EM:
             if (debugEnabled)
                 fprintf(stderr, "%*sEM {\n", debugIndentLevel, "");
+            
+            textStyleMask |= STYLE_TEXT_MASK_EMPHASIZED;
+            setStyle(blockList->styleType, textStyleMask, blockList->u.hDetail.level);
             break;
             
         case MD_SPAN_STRONG:
             if (debugEnabled)
                 fprintf(stderr, "%*sSTRONG {\n", debugIndentLevel, "");
+            
+            textStyleMask |= STYLE_TEXT_MASK_STRONG;
+            setStyle(blockList->styleType, textStyleMask, blockList->u.hDetail.level);
             break;
             
         case MD_SPAN_A:
@@ -560,6 +593,7 @@ static int enterSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
         case MD_SPAN_CODE:
             if (debugEnabled)
                 fprintf(stderr, "%*sCODE {\n", debugIndentLevel, "");
+            setStyle(STYLE_TYPE_CODE, STYLE_TEXT_PLAIN, 0);
             break;
             
         default:
@@ -581,9 +615,13 @@ static int leaveSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
     
     switch (type) {
         case MD_SPAN_EM:
+            textStyleMask &= ~STYLE_TEXT_MASK_EMPHASIZED;
+            setStyle(blockList->styleType, textStyleMask, blockList->u.hDetail.level);
             break;
             
         case MD_SPAN_STRONG:
+            textStyleMask &= ~STYLE_TEXT_MASK_STRONG;
+            setStyle(blockList->styleType, textStyleMask, blockList->u.hDetail.level);
             break;
             
         case MD_SPAN_A:
@@ -593,6 +631,7 @@ static int leaveSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
             break;
             
         case MD_SPAN_CODE:
+            setStyle(blockList->styleType, textStyleMask, blockList->u.hDetail.level);
             break;
             
         default:
@@ -670,7 +709,7 @@ static int textHook(MD_TEXTTYPE type, const MD_CHAR * text, MD_SIZE size, void *
         case MD_TEXT_BR:
             if (debugEnabled)
                 fprintf(stderr, "%*sBR\n", debugIndentLevel, "");
-            putchar('\n');
+            writeChar('\n');
             return 0;
             
         case MD_TEXT_SOFTBR:
