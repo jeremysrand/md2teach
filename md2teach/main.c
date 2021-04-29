@@ -33,7 +33,6 @@
 
 // Globals
 
-void * lowestStackSeen;
 char * commandName;
 int debugEnabled = 0;
 
@@ -89,8 +88,6 @@ int main(int argc, char * argv[])
     MD_CHAR * inputBuffer;
     int index;
     
-    lowestStackSeen = &result;
-    
     index = parseArgs(argc, argv);
     if (index < 0)
         exit(1);
@@ -113,7 +110,6 @@ int main(int argc, char * argv[])
     
     if (debugEnabled) {
         fprintf(stderr, "Parser result: %d\n", result);
-        fprintf(stderr, "Most stack used: %lu\n", ((unsigned long)&result) - ((unsigned long)lowestStackSeen));
     }
     
     if (result != 0)

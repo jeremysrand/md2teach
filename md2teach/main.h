@@ -11,7 +11,6 @@
 #pragma memorymodel 1
 
 extern char * commandName;
-extern void * lowestStackSeen;
 extern int debugEnabled;
 
 

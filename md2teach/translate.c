@@ -323,10 +323,6 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
     newBlock->next = blockList;
     blockList = newBlock;
     
-    if ((detail != NULL) &&
-        (detail < lowestStackSeen))
-        lowestStackSeen = detail;
-    
     switch (type) {
         case MD_BLOCK_DOC:
             if (debugEnabled)
@@ -501,10 +497,6 @@ static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
     blockList = oldBlock->next;
     free(oldBlock);
     
-    if ((detail != NULL) &&
-        (detail < lowestStackSeen))
-        lowestStackSeen = detail;
-    
     switch (type) {
         case MD_BLOCK_DOC:
             break;
@@ -559,10 +551,6 @@ static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
 
 static int enterSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
 {
-    if ((detail != NULL) &&
-        (detail < lowestStackSeen))
-        lowestStackSeen = detail;
-    
     switch (type) {
         case MD_SPAN_EM:
             if (debugEnabled)
@@ -609,10 +597,6 @@ static int enterSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
 
 static int leaveSpanHook(MD_SPANTYPE type, void * detail, void * userdata)
 {
-    if ((detail != NULL) &&
-        (detail < lowestStackSeen))
-        lowestStackSeen = detail;
-    
     switch (type) {
         case MD_SPAN_EM:
             textStyleMask &= ~STYLE_TEXT_MASK_EMPHASIZED;

@@ -12,13 +12,25 @@
 #include <string.h>
 
 #include <gsos.h>
+#include <orca.h>
+#include <resources.h>
 
 #include "io.h"
 #include "main.h"
 
 
+// Defines
+
+// This enables a workaround for creating the resources by writing a .rez file rather than
+// writing it directly.  At the moment, Golden Gate does not support writing resources
+// but this will let me test it without that capability.
+#define RESOURCE_WORKAROUND
+
+
 // Globals
 
+static GSString255 outputFileName;
+static Word writeResId;
 static IORecGS writeRec;
 static char writeBuffer[4096];
 static int32_t writeBufferOffset = 0;
@@ -41,7 +53,6 @@ static void flushBuffer(void)
 
 int openOutputFile(const char * filename)
 {
-    GSString255 outputFileName;
     CreateRecGS createRec;
     NameRecGS destroyRec;
     OpenRecGS openRec;
@@ -82,6 +93,7 @@ int openOutputFile(const char * filename)
     writeRec.pCount = 4;
     writeRec.refNum = openRec.refNum;
     writeRec.dataBuffer = writeBuffer;
+    
     return 0;
 }
 
@@ -117,12 +129,38 @@ MD_SIZE outputPos(void)
 void closeOutputFile(void)
 {
     RefNumRecGS closeRec;
+    int shutdownResources = 0;
     
     if (writeBufferOffset > 0)
         flushBuffer();
     closeRec.pCount = 1;
     closeRec.refNum = writeRec.refNum;
     CloseGS(&closeRec);
+    
+    if (!ResourceStatus()) {
+        ResourceStartUp(userid());
+        shutdownResources = 1;
+    }
+    
+#ifdef RESOURCE_WORKAROUND
+    CreateResourceFile(0x5445, 0x50, destroyEnable | renameEnable | readWriteEnable, (Pointer)outputFileName);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to create resources of file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
+    }
+    writeResId = OpenResourceFile(0x8000 | readWriteEnable, NULL, (Pointer)outputFileName);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to open resources of file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
+    } else {
+        CloseResourceFile(writeResId);
+    }
+    
+    // Implement more of this...
+    
+    if (shutdownResources)
+        ResourceShutDown();
+#else
+    // Implement the workaround here...
+#endif
 }
 
 
