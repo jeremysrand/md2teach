@@ -12,6 +12,7 @@
 
 extern char * commandName;
 extern int debugEnabled;
+extern int debugIndentLevel;
 
 
 #endif /* main_h */

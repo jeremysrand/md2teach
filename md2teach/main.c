@@ -35,6 +35,7 @@
 
 char * commandName;
 int debugEnabled = 0;
+int debugIndentLevel = 0;
 
 
 // Implementation

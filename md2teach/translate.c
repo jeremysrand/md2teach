@@ -64,8 +64,6 @@ static MD_PARSER parser = {
     NULL // syntax
 };
 
-static int debugIndentLevel = 0;
-
 static tBlockListItem * blockList = NULL;
 
 static uint16_t textStyleMask = STYLE_TEXT_PLAIN;
@@ -318,7 +316,8 @@ static int enterBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
         newBlock->numTabs = blockList->numTabs;
         if (blockList->styleType == STYLE_TYPE_QUOTE)
             newBlock->styleType = STYLE_TYPE_QUOTE;
-        newBlock->styleType = STYLE_TYPE_TEXT;
+        else
+            newBlock->styleType = STYLE_TYPE_TEXT;
     }
     newBlock->next = blockList;
     blockList = newBlock;
@@ -505,11 +504,9 @@ static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
             
         case MD_BLOCK_UL:
-            writeChar('\r');
             break;
             
         case MD_BLOCK_OL:
-            writeChar('\r');
             break;
             
         case MD_BLOCK_LI:
@@ -521,11 +518,12 @@ static int leaveBlockHook(MD_BLOCKTYPE type, void * detail, void * userdata)
             break;
             
         case MD_BLOCK_H:
+            if (blockList != NULL)
+                setStyle(blockList->styleType, textStyleMask, 0);
             writeChar('\r');
             break;
             
         case MD_BLOCK_CODE:
-            writeChar('\r');
             break;
             
         case MD_BLOCK_P:

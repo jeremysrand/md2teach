@@ -222,6 +222,10 @@ void setStyle(tStyleType styleType, uint16_t textMask, uint16_t headerSize)
     // Check to see if the previous style actually emitted any characters and if not,
     // then just overwrite it with this new style.
     currentPos = outputPos();
+    
+    if (debugEnabled)
+        fprintf(stderr, "%*ssetStyle(%u,%u,%u) @ offset %lu\n", debugIndentLevel, "", (uint16_t)styleType, textMask, headerSize, currentPos);
+    
     if (styleChangedAt == currentPos) {
         formatPtr->styleItems[lastStyleIndex].dataOffset = styleOffset;
         return;
