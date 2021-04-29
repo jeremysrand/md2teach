@@ -102,11 +102,8 @@ int main(int argc, char * argv[])
     }
     
     result = parse(inputBuffer, inputFileLen);
-    
-    closeOutputFile();
+
     releaseInputBuffer(inputBuffer);
-    
-    putchar('\n');
     
     if (debugEnabled) {
         fprintf(stderr, "Parser result: %d\n", result);
@@ -114,6 +111,14 @@ int main(int argc, char * argv[])
     
     if (result != 0)
         fprintf(stderr, "%s: Parser failed (%d)\n", commandName, result);
+    
+    if (closeOutputFile() != 0)
+        result = 1;
+    
+    if (result != 0)
+        remove(argv[index + 1]);
+    
+    putchar('\n');
     
     return result;
 }

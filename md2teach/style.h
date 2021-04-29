@@ -35,5 +35,8 @@ extern int styleInit(void);
 extern void setStyle(tStyleType styleType, uint16_t textMask, uint16_t headerSize);
 extern void closeStyle(void);
 
+uint8_t * stylePtr(void);
+uint32_t styleSize(void);
+
 
 #endif /* define _GUARD_PROJECTmd2teach_FILEstyle_ */

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+PROJECT_DIR=`pwd`
+cd `dirname $1`
+
+TEACH_FILE=`basename $1`
+BASEFILE=`echo $TEACH_FILE | sed 's/\.[^\/]*$//'`
+REZ_FILE="${BASEFILE}.rez"
+R_FILE="${BASEFILE}.r"
+
+mv "${TEACH_FILE}.rez" "$REZ_FILE"
+
+$ORCA chtyp -l rez "$REZ_FILE"
+$PROJECT_DIR/make/orca-rez "$REZ_FILE" "$BASEFILE"
+if [ $? -ne 0 ]
+then
+    echo Error compiling resource file
+    exit 1
+fi
+
+cp "${R_FILE}"/..namedfork/rsrc "$TEACH_FILE"/..namedfork/rsrc
+
+exit 0

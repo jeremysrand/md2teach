@@ -17,7 +17,7 @@ extern int openOutputFile(const char * filename);
 extern void writeChar(MD_CHAR ch);
 extern void writeString(const MD_CHAR * str, MD_SIZE size);
 extern MD_SIZE outputPos(void);
-extern void closeOutputFile(void);
+extern int closeOutputFile(void);
 
 extern const MD_CHAR * readInputFile(const char * filename, MD_SIZE * bufferSize);
 extern void releaseInputBuffer(const MD_CHAR * inputBuffer);

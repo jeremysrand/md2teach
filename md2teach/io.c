@@ -17,6 +17,7 @@
 
 #include "io.h"
 #include "main.h"
+#include "style.h"
 
 
 // Defines
@@ -26,15 +27,43 @@
 // but this will let me test it without that capability.
 #define RESOURCE_WORKAROUND
 
+#define TEACH_FILE_TYPE 0x50
+#define TEACH_AUX_TYPE 0x5445
+
+#define R_WINDOW_POSITION 0x7001
+#define WINDOW_POSITION_NUM 1
+
+#define STYLE_BLOCK_NUM 1
+
+
+
+// Typedefs
+
+typedef struct tWindowPos
+{
+    int16_t height;
+    int16_t width;
+    int16_t top;
+    int16_t left;
+    int32_t version;
+} tWindowPos;
+
 
 // Globals
 
 static GSString255 outputFileName;
-static Word writeResId;
 static IORecGS writeRec;
 static char writeBuffer[4096];
 static int32_t writeBufferOffset = 0;
 static MD_SIZE writePos = 0;
+
+static tWindowPos windowPos = {
+    0xad,   // height
+    0x27c,  // width
+    0x1a,   // top
+    0x02,   // left
+    0x0     // version
+};
 
 
 // Implementation
@@ -71,8 +100,8 @@ int openOutputFile(const char * filename)
     createRec.pCount = 5;
     createRec.pathname = &outputFileName;
     createRec.access = destroyEnable | renameEnable | readWriteEnable;
-    createRec.fileType = 0x50; // Type for Teach file
-    createRec.auxType = 0x5445; // Aux type for Teach file
+    createRec.fileType = TEACH_FILE_TYPE;
+    createRec.auxType = TEACH_AUX_TYPE;
     createRec.storageType = extendedFile;
     CreateGS(&createRec);
     if (toolerror()) {
@@ -126,10 +155,106 @@ MD_SIZE outputPos(void)
 }
 
 
-void closeOutputFile(void)
+static int writeResources(void)
+{
+#ifndef RESOURCE_WORKAROUND
+    int shutdownResources = 0;
+    Word writeResId;
+    
+    if (!ResourceStatus()) {
+        ResourceStartUp(userid());
+        shutdownResources = 1;
+    }
+    
+    CreateResourceFile(TEACH_AUX_TYPE, TEACH_FILE_TYPE, destroyEnable | renameEnable | readWriteEnable, (Pointer)outputFileName);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to create resources of file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
+        return 1;
+    }
+    writeResId = OpenResourceFile(0x8000 | readWriteEnable, NULL, (Pointer)outputFileName);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to open resources of file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
+        return 1;
+    }
+    
+    CloseResourceFile(writeResId);
+    
+    // Implement more of this...
+    
+    if (shutdownResources)
+        ResourceShutDown();
+#else
+    FILE * rezFile;
+    uint8_t * ptr;
+    uint32_t size;
+    uint32_t i;
+    
+    strcat(outputFileName.text, ".rez");
+    rezFile = fopen(outputFileName.text, "w");
+    if (rezFile == NULL) {
+        fprintf(stderr, "%s: Unable to open resource file %s, %s\n", commandName, outputFileName.text, strerror(errno));
+        return 1;
+    }
+    
+    fprintf(rezFile,
+"#define rStyleBlock 0x%x\n"
+"#define rWindowPosition 0x%x\n"
+"\n"
+"type rStyleBlock {\n"
+"    hex string;\n"
+"};\n"
+"\n"
+"type rWindowPosition {\n"
+"    hex string;\n"
+"};\n"
+"\n"
+"resource rStyleBlock (%u) {\n"
+"    $\"",
+            rStyleBlock, R_WINDOW_POSITION, STYLE_BLOCK_NUM
+            );
+    
+    ptr = stylePtr();
+    size = styleSize();
+    for (i = 0; i < size; i++) {
+        if ((i > 0) &&
+            ((i % 32) == 0)) {
+            fprintf(rezFile, "\"\n    $\"");
+        }
+        fprintf(rezFile, "%02x", (uint16_t)*ptr);
+        ptr++;
+    }
+    
+    fprintf(rezFile, "\"\n"
+"};\n"
+"\n"
+"resource rWindowPosition (%u) {\n"
+"    $\"",
+            WINDOW_POSITION_NUM);
+    
+    ptr = (uint8_t *)(&windowPos);
+    size = sizeof(windowPos);
+    for (i = 0; i < size; i++) {
+        if ((i > 0) &&
+            ((i % 32) == 0)) {
+            fprintf(rezFile, "\"\n    $\"");
+        }
+        fprintf(rezFile, "%02x", (uint16_t)*ptr);
+        ptr++;
+    }
+    fprintf(rezFile, "\"\n"
+"};\n"
+"\n");
+    
+    fclose(rezFile);
+#endif
+    
+    return 0;
+}
+
+
+int closeOutputFile(void)
 {
     RefNumRecGS closeRec;
-    int shutdownResources = 0;
     
     if (writeBufferOffset > 0)
         flushBuffer();
@@ -137,30 +262,7 @@ void closeOutputFile(void)
     closeRec.refNum = writeRec.refNum;
     CloseGS(&closeRec);
     
-    if (!ResourceStatus()) {
-        ResourceStartUp(userid());
-        shutdownResources = 1;
-    }
-    
-#ifdef RESOURCE_WORKAROUND
-    CreateResourceFile(0x5445, 0x50, destroyEnable | renameEnable | readWriteEnable, (Pointer)outputFileName);
-    if (toolerror()) {
-        fprintf(stderr, "%s: Unable to create resources of file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
-    }
-    writeResId = OpenResourceFile(0x8000 | readWriteEnable, NULL, (Pointer)outputFileName);
-    if (toolerror()) {
-        fprintf(stderr, "%s: Unable to open resources of file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
-    } else {
-        CloseResourceFile(writeResId);
-    }
-    
-    // Implement more of this...
-    
-    if (shutdownResources)
-        ResourceShutDown();
-#else
-    // Implement the workaround here...
-#endif
+    return writeResources();
 }
 
 

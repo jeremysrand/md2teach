@@ -36,15 +36,6 @@
 
 // Typedefs
 
-typedef struct tWindowPos
-{
-    int16_t height;
-    int16_t width;
-    int16_t top;
-    int16_t left;
-    int32_t version;
-} tWindowPos;
-
 // I wish I could use the structure definition from textedit.h but TERuler contains optional
 // fields in the definition and Teach isn't expecting them it seems (array of theTabs).  So,
 // I need my own struct which omits them.
@@ -79,14 +70,6 @@ typedef struct tFormat
 
 
 // Globals
-
-static tWindowPos windowPos = {
-    0xad,   // height
-    0x27c,  // width
-    0x1a,   // top
-    0x02,   // left
-    0x0     // version
-};
 
 // For the 6 header sizes, we are going with:
 //      1 -> Helvetica 36
@@ -267,4 +250,14 @@ void closeStyle(void)
     } else {
         formatPtr->styleItems[lastStyleIndex]. dataLength = currentPos - styleChangedAt;
     }
+}
+
+uint8_t * stylePtr(void)
+{
+    return (uint8_t *)formatPtr;
+}
+
+uint32_t styleSize(void)
+{
+    return sizeof(formatPtr->header) + (sizeof(formatPtr->styleItems) * formatPtr->header.numberOfStyles);
 }

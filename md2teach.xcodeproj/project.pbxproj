@@ -68,6 +68,7 @@
 		9DDFC7C4262FD50C006D6E71 /* createDiskImage */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = createDiskImage; sourceTree = "<group>"; };
 		9DDFC7C5262FD50D006D6E71 /* config.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = config.txt; sourceTree = "<group>"; };
 		9DDFC7CA262FD7DD006D6E71 /* tar */ = {isa = PBXFileReference; lastKnownFileType = file; path = tar; sourceTree = "<group>"; };
+		9DEEBB90263A673200DAA063 /* teachRez */ = {isa = PBXFileReference; lastKnownFileType = text; path = teachRez; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +130,7 @@
 				9D6532F52626240800105D50 /* orca-cc */,
 				9D6532F72626240800105D50 /* orca-rez */,
 				9D6532F92626240800105D50 /* tail.mk */,
+				9DEEBB90263A673200DAA063 /* teachRez */,
 				9DDFC7C5262FD50D006D6E71 /* config.txt */,
 				9DDFC7C4262FD50C006D6E71 /* createDiskImage */,
 				9DDFC7C3262FD50C006D6E71 /* empty.2mg */,
