@@ -290,8 +290,6 @@ static tEntity entities[] = {
     { "&ogon;", 0xfe, 0x2db },
     { "&caron;", 0xff, 0x2c7 },
     { "&Hacek;", 0xff, 0x2c7 },
-    
-    // GS_TODO - Test each of these entities.
 };
 
 // Implementation
