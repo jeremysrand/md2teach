@@ -27,8 +27,8 @@
 // approach should let me measure the worst case stack with a complex
 // document.
 //
-// Leaving the stack very big for now at 32K.
-#pragma stacksize 32768
+// Leaving the stack very big for now at 8K.
+#pragma stacksize 8192
 
 
 // Globals
@@ -120,6 +120,8 @@ int main(int argc, char * argv[])
         remove(argv[index + 1]);
     
     putchar('\n');
+    
+    styleShutdown();
     
     return result;
 }

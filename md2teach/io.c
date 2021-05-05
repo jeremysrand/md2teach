@@ -13,6 +13,7 @@
 
 #include <gsos.h>
 #include <orca.h>
+#include <memory.h>
 #include <resources.h>
 
 #include "io.h"
@@ -157,9 +158,12 @@ MD_SIZE outputPos(void)
 
 static int writeResources(void)
 {
+    int result = 0;
 #ifndef RESOURCE_WORKAROUND
     int shutdownResources = 0;
     Word writeResId;
+    Word oldResId;
+    Handle windowPosHandle;
     
     if (!ResourceStatus()) {
         ResourceStartUp(userid());
@@ -171,15 +175,44 @@ static int writeResources(void)
         fprintf(stderr, "%s: Unable to create resources of file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
         return 1;
     }
+    
+    oldResId = GetCurResourceFile();
+    
     writeResId = OpenResourceFile(0x8000 | readWriteEnable, NULL, (Pointer)outputFileName);
     if (toolerror()) {
         fprintf(stderr, "%s: Unable to open resources of file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
         return 1;
     }
     
+    AddResource(styleHandle(), resChanged, rStyleBlock, STYLE_BLOCK_NUM);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to add style resource to file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
+        result = 1;
+        goto error;
+    }
+    
+    windowPosHandle = NewHandle(sizeof(windowPos), userid(), attrNoPurge, NULL);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to allocate memory for window resource for file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
+        result = 1;
+        goto error;
+    }
+    HLock(windowPosHandle);
+    PtrToHand((Pointer)windowPos, windowPosHandle, sizeof(windowPos));
+    
+    AddResource(windowPosHandle, resChanged, R_WINDOW_POSITION, WINDOW_POSITION_NUM);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to add window position resource to file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
+        result = 1;
+    }
+    
+    DisposeHandle(windowPosHandle);
+
+error:
     CloseResourceFile(writeResId);
     
-    // Implement more of this...
+    if (oldResId != 0)
+        SetCurResourceFile(oldResId);
     
     if (shutdownResources)
         ResourceShutDown();
@@ -248,7 +281,7 @@ static int writeResources(void)
     fclose(rezFile);
 #endif
     
-    return 0;
+    return result;
 }
 
 

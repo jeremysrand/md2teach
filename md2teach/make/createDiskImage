@@ -15,7 +15,7 @@ shift
 FILE="$1"
 shift
 
-BOOTCOPYPATH="$1"
+BOOTCOPYPATH=""
 
 PROGRAM=`basename "$FILE"`
 TMPDIR=/tmp/a2gs_mount.$$
@@ -171,6 +171,16 @@ if [ $? != 0 ]
 then
     echo Unable to copy the file to the disk image.
     cleanupAndExit
+fi
+
+if [ ! -z "$1" ]
+then
+    cp $CPARGS "$@" "$MOUNTDIR"
+    if [ $? != 0 ]
+    then
+        echo Unable to copy extra files to the disk image.
+        cleanupAndExit
+    fi
 fi
 
 OLDDIR=`pwd`

@@ -8,6 +8,11 @@ BASEFILE=`echo $TEACH_FILE | sed 's/\.[^\/]*$//'`
 REZ_FILE="${BASEFILE}.rez"
 R_FILE="${BASEFILE}.r"
 
+if [ ! -f "${TEACH_FILE}.rez" ]
+then
+    exit 0
+fi
+
 mv "${TEACH_FILE}.rez" "$REZ_FILE"
 
 $ORCA chtyp -l rez "$REZ_FILE"

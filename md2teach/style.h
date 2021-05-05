@@ -9,6 +9,8 @@
 #ifndef _GUARD_PROJECTmd2teach_FILEstyle_
 #define _GUARD_PROJECTmd2teach_FILEstyle_
 
+#include <types.h>
+
 #include "md4c.h"
 
 
@@ -32,9 +34,11 @@ typedef enum tStyleType {
 // API
 
 extern int styleInit(void);
+extern void styleShutdown(void);
 extern void setStyle(tStyleType styleType, uint16_t textMask, uint16_t headerSize);
 extern void closeStyle(void);
 
+Handle styleHandle(void);
 uint8_t * stylePtr(void);
 uint32_t styleSize(void);
 

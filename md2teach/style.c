@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 #include <font.h>
+#include <memory.h>
 #include <textedit.h>
 
 #include "io.h"
@@ -87,28 +88,33 @@ static uint8_t headerFontSizes[NUM_HEADER_SIZES] = {
     18
 };
 
-static tFormat * formatPtr = NULL;
+static Handle formatHandle = NULL;
 static uint32_t allocStyleItems = 0;
 static MD_SIZE styleChangedAt = 0;
 
 
 // Implementation
 
-void growStyleItems(void)
+static tFormat * growStyleItems(void)
 {
     uint32_t newAllocStyleItems = 2 * allocStyleItems;
     
-    formatPtr = realloc(formatPtr, sizeof(formatPtr->header) + newAllocStyleItems * sizeof(StyleItem));
-    if (formatPtr == NULL) {
-        fprintf(stderr, "%s: Out of memory\n", commandName);
+    HUnlock(formatHandle);
+    SetHandleSize(sizeof(tFormatHeader) + newAllocStyleItems * sizeof(StyleItem), formatHandle);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Out of memory, toolerror=0x%x\n", commandName, toolerror());
         exit(1);
     }
+    
     allocStyleItems = newAllocStyleItems;
+    HLock(formatHandle);
+    return (tFormat *)(*formatHandle);
 }
 
 
 int addStyle(int styleListNum, uint16_t fontFamily, uint8_t fontSize, uint8_t fontStyle, uint16_t backgroundColour)
 {
+    tFormat * formatPtr = (tFormat *)(*formatHandle);
     formatPtr->header.styleList[styleListNum].styleFontID.fidRec.famNum = fontFamily;
     formatPtr->header.styleList[styleListNum].styleFontID.fidRec.fontSize = fontSize;
     formatPtr->header.styleList[styleListNum].styleFontID.fidRec.fontStyle = fontStyle;
@@ -123,12 +129,15 @@ int styleInit(void)
 {
     int styleListNum;
     int headerSize;
+    tFormat * formatPtr;
     
-    formatPtr = malloc(sizeof(formatPtr->header) + STARTING_STYLE_ITEMS * sizeof(StyleItem));
-    if (formatPtr == NULL) {
-        fprintf(stderr, "%s: Out of memory\n", commandName);
+    formatHandle = NewHandle(sizeof(formatPtr->header) + STARTING_STYLE_ITEMS * sizeof(StyleItem), userid(), attrNoPurge, NULL);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Out of memory, toolerror=0x%x\n", commandName, toolerror());
         return 1;
     }
+    HLock(formatHandle);
+    formatPtr = (tFormat *)(*formatHandle);
     allocStyleItems = STARTING_STYLE_ITEMS;
     
     formatPtr->header.version = 0x0000;
@@ -175,6 +184,8 @@ int styleInit(void)
     // Add code style
     styleListNum = addStyle(styleListNum, courier, 12, plainMask, 0xffff);
     
+    HUnlock(formatHandle);
+    
     if (styleListNum != TOTAL_STYLES)
     {
         fprintf(stderr, "%s: Expected %d styles but created %d styles.\n", commandName);
@@ -189,7 +200,13 @@ void setStyle(tStyleType styleType, uint16_t textMask, uint16_t headerSize)
 {
     int32_t styleOffset;
     MD_SIZE currentPos;
-    int lastStyleIndex = formatPtr->header.numberOfStyles - 1;
+    int lastStyleIndex;
+    tFormat * formatPtr;
+    
+    HLock(formatHandle);
+    formatPtr = (tFormat *)(*formatHandle);
+    
+    lastStyleIndex = formatPtr->header.numberOfStyles - 1;
     
     switch (styleType) {
         case STYLE_TYPE_HEADER:
@@ -217,7 +234,10 @@ void setStyle(tStyleType styleType, uint16_t textMask, uint16_t headerSize)
     // If the offset requested is the same as the one we already have, then just return.
     // Nothing has changed.
     if (formatPtr->styleItems[lastStyleIndex].dataOffset == styleOffset)
+    {
+        HUnlock(formatHandle);
         return;
+    }
     
     // Check to see if the previous style actually emitted any characters and if not,
     // then just overwrite it with this new style.
@@ -228,6 +248,7 @@ void setStyle(tStyleType styleType, uint16_t textMask, uint16_t headerSize)
     
     if (styleChangedAt == currentPos) {
         formatPtr->styleItems[lastStyleIndex].dataOffset = styleOffset;
+        HUnlock(formatHandle);
         return;
     }
     
@@ -235,17 +256,25 @@ void setStyle(tStyleType styleType, uint16_t textMask, uint16_t headerSize)
     styleChangedAt = currentPos;
     
     if (formatPtr->header.numberOfStyles == allocStyleItems)
-        growStyleItems();
+        formatPtr = growStyleItems();
     
     lastStyleIndex++;
     formatPtr->header.numberOfStyles++;
     formatPtr->styleItems[lastStyleIndex].dataOffset = styleOffset;
+    HUnlock(formatHandle);
 }
 
 void closeStyle(void)
 {
+    int lastStyleIndex;
+    tFormat * formatPtr;
+    uint32_t formatSize;
     MD_SIZE currentPos = outputPos();
-    int lastStyleIndex = formatPtr->header.numberOfStyles - 1;
+    
+    HLock(formatHandle);
+    formatPtr = (tFormat *)(*formatHandle);
+    
+    lastStyleIndex = formatPtr->header.numberOfStyles - 1;
     
     // If the final style was not used, then remove it.  Otherwise, update the length of the
     // final style.
@@ -254,14 +283,31 @@ void closeStyle(void)
     } else {
         formatPtr->styleItems[lastStyleIndex]. dataLength = currentPos - styleChangedAt;
     }
+    
+    formatSize = sizeof(formatPtr->header) + (sizeof(formatPtr->styleItems) * formatPtr->header.numberOfStyles);
+    
+    HUnlock(formatHandle);
+    if (GetHandleSize(formatHandle) != formatSize)
+        SetHandleSize(formatSize, formatHandle);
+}
+
+Handle styleHandle(void)
+{
+    return formatHandle;
 }
 
 uint8_t * stylePtr(void)
 {
-    return (uint8_t *)formatPtr;
+    HLock(formatHandle);
+    return (uint8_t *)(*formatHandle);
 }
 
 uint32_t styleSize(void)
 {
-    return sizeof(formatPtr->header) + (sizeof(formatPtr->styleItems) * formatPtr->header.numberOfStyles);
+    return GetHandleSize(formatHandle);
+}
+
+void styleShutdown(void)
+{
+    DisposeHandle(formatHandle);
 }
