@@ -13,6 +13,6 @@
 extern char * commandName;
 extern int debugEnabled;
 extern int debugIndentLevel;
-
+extern int generateRez;
 
 #endif /* main_h */

@@ -26,7 +26,6 @@
 // This enables a workaround for creating the resources by writing a .rez file rather than
 // writing it directly.  At the moment, Golden Gate does not support writing resources
 // but this will let me test it without that capability.
-#define RESOURCE_WORKAROUND
 
 #define TEACH_FILE_TYPE 0x50
 #define TEACH_AUX_TYPE 0x5445
@@ -159,7 +158,6 @@ MD_SIZE outputPos(void)
 static int writeResources(void)
 {
     int result = 0;
-#ifndef RESOURCE_WORKAROUND
     int shutdownResources = 0;
     Word writeResId;
     Word oldResId;
@@ -216,7 +214,14 @@ error:
     
     if (shutdownResources)
         ResourceShutDown();
-#else
+
+    return result;
+}
+
+
+static int writeRez(void)
+{
+    int result = 0;
     FILE * rezFile;
     uint8_t * ptr;
     uint32_t size;
@@ -279,7 +284,6 @@ error:
 "\n");
     
     fclose(rezFile);
-#endif
     
     return result;
 }
@@ -295,7 +299,7 @@ int closeOutputFile(void)
     closeRec.refNum = writeRec.refNum;
     CloseGS(&closeRec);
     
-    return writeResources();
+    return generateRez ? writeRez() : writeResources();
 }
 
 
