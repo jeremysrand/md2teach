@@ -36,13 +36,14 @@
 char * commandName;
 int debugEnabled = 0;
 int debugIndentLevel = 0;
+int generateRez = 0;
 
 
 // Implementation
 
 static void printUsage(void)
 {
-    fprintf(stderr, "USAGE: %s [ -d ] inputfile outputfile\n", commandName);
+    fprintf(stderr, "USAGE: %s [ -d -r ] inputfile outputfile\n", commandName);
 }
 
 
@@ -63,6 +64,9 @@ static int parseArgs(int argc, char * argv[])
             switch (argv[index][charOffset]) {
                 case 'd':
                     debugEnabled = 1;
+                    break;
+                case 'r':
+                    generateRez = 1;
                     break;
                 
                 default:
