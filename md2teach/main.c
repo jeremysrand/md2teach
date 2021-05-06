@@ -43,7 +43,7 @@ int generateRez = 0;
 
 static void printUsage(void)
 {
-    fprintf(stderr, "USAGE: %s [ -d -r ] inputfile outputfile\n", commandName);
+    fprintf(stderr, "USAGE: %s [ -d ] [ -r ] inputfile outputfile\n", commandName);
 }
 
 
@@ -65,6 +65,7 @@ static int parseArgs(int argc, char * argv[])
                 case 'd':
                     debugEnabled = 1;
                     break;
+                    
                 case 'r':
                     generateRez = 1;
                     break;

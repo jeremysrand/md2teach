@@ -23,10 +23,6 @@
 
 // Defines
 
-// This enables a workaround for creating the resources by writing a .rez file rather than
-// writing it directly.  At the moment, Golden Gate does not support writing resources
-// but this will let me test it without that capability.
-
 #define TEACH_FILE_TYPE 0x50
 #define TEACH_AUX_TYPE 0x5445
 
@@ -34,7 +30,6 @@
 #define WINDOW_POSITION_NUM 1
 
 #define STYLE_BLOCK_NUM 1
-
 
 
 // Typedefs
