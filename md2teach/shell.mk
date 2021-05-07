@@ -34,7 +34,7 @@ TARGETTYPE=shell
 # here:
 #
 # EMULATOR=gsplus
-# EMULATOR=mame
+EMULATOR=mame
 # EMULATOR=gsport
 
 # By default, the build provides a single boot environment to test with.
@@ -118,7 +118,7 @@ COPYBOOTDIRS=
 
 # By default, the build uses no arguments with GSplus.  If you would like to
 # use different arguments, specify that here.
-# GSPLUSARGS=
+GSPLUSARGS=-mem 4194304
 
 # By default, the build expects that you have GSport in the path:
 # 	/Applications/GSport/GSport.app/Contents/MacOS/GSport
@@ -142,7 +142,7 @@ COPYBOOTDIRS=
 # By default, the build uses these arguments with mame:
 # 	apple2gs -skip_gameinfo -mouse -window -resolution 1408x1056 -ramsize 4M -sl7 cffa202
 # If you would like to use different arguments, specify that here.
-# MAMEARGS=apple2gs -skip_gameinfo -mouse -window -resolution 1408x1056 -ramsize 4M -sl7 cffa202
+MAMEARGS=apple2gs -skip_gameinfo -speed 3 -mouse -window -resolution 1408x1056 -ramsize 4M -sl7 cffa202
 
 # For a desktop application, it can operate in 640x200 or 320x200
 # resolution.  This setting is used to define which horizontal
