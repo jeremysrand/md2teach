@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9D6532ED2626240800105D50 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 9D6532EC2626240800105D50 /* main.c */; };
-		9D6532EF2626240800105D50 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9D6532EE2626240800105D50 /* Makefile */; };
+		9D6532EF2626240800105D50 /* shell.mk in Sources */ = {isa = PBXBuildFile; fileRef = 9D6532EE2626240800105D50 /* shell.mk */; };
 		9D6532F22626240800105D50 /* head.mk in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532F12626240800105D50 /* head.mk */; };
 		9D6532F42626240800105D50 /* orca-asm in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532F32626240800105D50 /* orca-asm */; };
 		9D6532F62626240800105D50 /* orca-cc in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532F52626240800105D50 /* orca-cc */; };
@@ -40,10 +40,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9D406AA12644E8CF00747EE9 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		9D406AB12644EB6500747EE9 /* babelfish.mk */ = {isa = PBXFileReference; lastKnownFileType = text; path = babelfish.mk; sourceTree = "<group>"; };
 		9D6532E42626240800105D50 /* md2teach */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = md2teach; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D6532EA2626240800105D50 /* doNotBuild */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = doNotBuild; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D6532EC2626240800105D50 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		9D6532EE2626240800105D50 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		9D6532EE2626240800105D50 /* shell.mk */ = {isa = PBXFileReference; lastKnownFileType = text; path = shell.mk; sourceTree = "<group>"; };
 		9D6532F12626240800105D50 /* head.mk */ = {isa = PBXFileReference; lastKnownFileType = text; path = head.mk; sourceTree = "<group>"; };
 		9D6532F32626240800105D50 /* orca-asm */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "orca-asm"; sourceTree = "<group>"; };
 		9D6532F52626240800105D50 /* orca-cc */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "orca-cc"; sourceTree = "<group>"; };
@@ -82,6 +84,28 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9D406A9C2644E80100747EE9 /* shell */ = {
+			isa = PBXGroup;
+			children = (
+				9D6532EC2626240800105D50 /* main.c */,
+				9D8125DA2634A539002F05F5 /* main.h */,
+				9D8125DB2634A584002F05F5 /* io.h */,
+				9D8125DC2634A584002F05F5 /* io.c */,
+				9D8125E22634AC4A002F05F5 /* translate.h */,
+				9D8125E32634AC4A002F05F5 /* translate.c */,
+				9D8125F12634B4D4002F05F5 /* style.h */,
+				9D8125F22634B4D4002F05F5 /* style.c */,
+			);
+			path = shell;
+			sourceTree = "<group>";
+		};
+		9D406AB02644EB4E00747EE9 /* babelfish */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = babelfish;
+			sourceTree = "<group>";
+		};
 		9D6532DD2626240800105D50 = {
 			isa = PBXGroup;
 			children = (
@@ -104,17 +128,13 @@
 		9D6532EB2626240800105D50 /* md2teach */ = {
 			isa = PBXGroup;
 			children = (
-				9D6532EC2626240800105D50 /* main.c */,
-				9D8125DA2634A539002F05F5 /* main.h */,
-				9D8125DB2634A584002F05F5 /* io.h */,
-				9D8125DC2634A584002F05F5 /* io.c */,
-				9D8125E22634AC4A002F05F5 /* translate.h */,
-				9D8125E32634AC4A002F05F5 /* translate.c */,
-				9D8125F12634B4D4002F05F5 /* style.h */,
-				9D8125F22634B4D4002F05F5 /* style.c */,
+				9D406AA12644E8CF00747EE9 /* Makefile */,
 				9D65330C2626246700105D50 /* md4c.c */,
 				9D65330B2626246700105D50 /* md4c.h */,
-				9D6532EE2626240800105D50 /* Makefile */,
+				9D6532EE2626240800105D50 /* shell.mk */,
+				9D406A9C2644E80100747EE9 /* shell */,
+				9D406AB12644EB6500747EE9 /* babelfish.mk */,
+				9D406AB02644EB4E00747EE9 /* babelfish */,
 				9DDFC7B42627E081006D6E71 /* test.md */,
 				9D6532F02626240800105D50 /* make */,
 				9D6532FB2626240800105D50 /* Supporting Files */,
@@ -244,7 +264,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D8125E42634AC4A002F05F5 /* translate.c in Sources */,
-				9D6532EF2626240800105D50 /* Makefile in Sources */,
+				9D6532EF2626240800105D50 /* shell.mk in Sources */,
 				9D8125DD2634A584002F05F5 /* io.c in Sources */,
 				9D8125F32634B4D4002F05F5 /* style.c in Sources */,
 				9D6532ED2626240800105D50 /* main.c in Sources */,

@@ -9,10 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "translate.h"
-#include "io.h"
-#include "main.h"
-#include "style.h"
+#include "shell/translate.h"
+#include "shell/io.h"
+#include "shell/main.h"
+#include "shell/style.h"
 
 
 // Typedefs

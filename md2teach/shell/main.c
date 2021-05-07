@@ -11,9 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "io.h"
-#include "main.h"
-#include "translate.h"
+#include "shell/io.h"
+#include "shell/main.h"
+#include "shell/translate.h"
 
 
 // GS_TODO - How big does the stack need to be?  In looking over the code,

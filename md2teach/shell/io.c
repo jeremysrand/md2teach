@@ -16,9 +16,9 @@
 #include <memory.h>
 #include <resources.h>
 
-#include "io.h"
-#include "main.h"
-#include "style.h"
+#include "shell/io.h"
+#include "shell/main.h"
+#include "shell/style.h"
 
 
 // Defines

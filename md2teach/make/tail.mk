@@ -48,6 +48,11 @@ else ifeq ($(TARGETTYPE),nda)
 else ifeq ($(TARGETTYPE),xcmd)
     FILETYPE=exe
     BUILDTARGET=$(TARGETDIR)/$(PGM)
+else ifeq ($(TARGETTYPE),babelfish)
+    FILETYPE=0xbe
+    AUXTYPE=-a 0x4003
+    BOOTCOPYPATH=System/SHS.Babelfish
+    BUILDTARGET=target
 endif
 
 
