@@ -293,7 +293,9 @@ void closeStyle(void)
 
 Handle styleHandle(void)
 {
-    return formatHandle;
+    Handle result = formatHandle;
+    formatHandle = NULL;
+    return result;
 }
 
 uint8_t * stylePtr(void)
@@ -309,5 +311,6 @@ uint32_t styleSize(void)
 
 void styleShutdown(void)
 {
-    DisposeHandle(formatHandle);
+    if (formatHandle != NULL)
+        DisposeHandle(formatHandle);
 }

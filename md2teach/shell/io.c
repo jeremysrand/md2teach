@@ -177,13 +177,6 @@ static int writeResources(void)
         return 1;
     }
     
-    AddResource(styleHandle(), resChanged, rStyleBlock, STYLE_BLOCK_NUM);
-    if (toolerror()) {
-        fprintf(stderr, "%s: Unable to add style resource to file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
-        result = 1;
-        goto error;
-    }
-    
     windowPosHandle = NewHandle(sizeof(windowPos), userid(), attrNoPurge, NULL);
     if (toolerror()) {
         fprintf(stderr, "%s: Unable to allocate memory for window resource for file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
@@ -193,13 +186,19 @@ static int writeResources(void)
     HLock(windowPosHandle);
     PtrToHand((Pointer)windowPos, windowPosHandle, sizeof(windowPos));
     
-    AddResource(windowPosHandle, resChanged, R_WINDOW_POSITION, WINDOW_POSITION_NUM);
+    AddResource(windowPosHandle, 0, R_WINDOW_POSITION, WINDOW_POSITION_NUM);
     if (toolerror()) {
         fprintf(stderr, "%s: Unable to add window position resource to file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
         result = 1;
+        DisposeHandle(windowPosHandle);
+        goto error;
     }
     
-    DisposeHandle(windowPosHandle);
+    AddResource(styleHandle(), 0, rStyleBlock, STYLE_BLOCK_NUM);
+    if (toolerror()) {
+        fprintf(stderr, "%s: Unable to add style resource to file %s, toolerror=0x%x\n", commandName, outputFileName.text, toolerror());
+        result = 1;
+    }
 
 error:
     CloseResourceFile(writeResId);
@@ -241,13 +240,12 @@ static int writeRez(void)
 "    hex string;\n"
 "};\n"
 "\n"
-"resource rStyleBlock (%u) {\n"
+"resource rWindowPosition (%u) {\n"
 "    $\"",
-            rStyleBlock, R_WINDOW_POSITION, STYLE_BLOCK_NUM
-            );
+            rStyleBlock, R_WINDOW_POSITION, WINDOW_POSITION_NUM);
     
-    ptr = stylePtr();
-    size = styleSize();
+    ptr = (uint8_t *)(&windowPos);
+    size = sizeof(windowPos);
     for (i = 0; i < size; i++) {
         if ((i > 0) &&
             ((i % 32) == 0)) {
@@ -260,12 +258,13 @@ static int writeRez(void)
     fprintf(rezFile, "\"\n"
 "};\n"
 "\n"
-"resource rWindowPosition (%u) {\n"
+"resource rStyleBlock (%u) {\n"
 "    $\"",
-            WINDOW_POSITION_NUM);
+            STYLE_BLOCK_NUM
+            );
     
-    ptr = (uint8_t *)(&windowPos);
-    size = sizeof(windowPos);
+    ptr = stylePtr();
+    size = styleSize();
     for (i = 0; i < size; i++) {
         if ((i > 0) &&
             ((i % 32) == 0)) {
@@ -274,6 +273,7 @@ static int writeRez(void)
         fprintf(rezFile, "%02x", (uint16_t)*ptr);
         ptr++;
     }
+
     fprintf(rezFile, "\"\n"
 "};\n"
 "\n");
