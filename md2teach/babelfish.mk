@@ -175,7 +175,10 @@ gen:
 # clean your build.
 genclean:
 
-target:
+$(TARGETDIR)/filter.bin: $(OBJDIR)/babelfish/filter.ROOT
+	cd $(OBJDIR); $(LINK) $(LDFLAGS) babelfish/filter keep="$(abspath $@)"
+
+target: $(TARGETDIR)/filter.bin
 	true
 
 # Do not change anything else below here...

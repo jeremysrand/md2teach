@@ -43,8 +43,8 @@ resource rTrData(TrData)
 };
 
 
-read rCodeResource(TrFilter, locked, convert) "filter_code";
-read rCodeResource(TrInit, locked, convert) "init_code";
+read rCodeResource(TrFilter, locked, convert) "filter.bin";
+read rCodeResource(TrInit, locked, convert) "init.bin";
 
 
 resource rText(TrImportInfo)
