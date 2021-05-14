@@ -37,16 +37,17 @@ offset_fileName	gequ 10
 
 filter start
 	
-_d		equ 1
-ptr	    equ 5
-_rtlb	equ 7
-DirPtr	equ 11
-retval	equ 15
+_b		equ 1
+ptr	    equ _b+2
+_d		equ ptr+4
+_rtlb	equ _d+1
+DirPtr	equ _rtlb+3
+retval	equ DirPtr+4
 
 		phb		;even up the stack
+		pha
+		pha
 		phd
-		pha
-		pha
 		tsc
 		tcd
 
@@ -60,14 +61,17 @@ retval	equ 15
 		lda [<DirPtr],y
 		sta <ptr+2
 		
-		lda [<ptr]
+		ldy #2
+		lda [<ptr],y
 		cmp #4
 		blt exit
 		tay
 		
 		short m
 		
-		dey
+		iny
+		iny
+		iny
 		lda [<ptr],y
 		cmp #'d'
 		beq checkM
@@ -85,7 +89,7 @@ checkM 	anop
 checkDot anop
 		dey
 		lda [<ptr],y
-		cmp #'m'
+		cmp #'.'
 		bne noMatch
 		
 		long m
@@ -97,9 +101,9 @@ noMatch anop
 		long m
 
 exit	anop
-		pla
-		pla
 		pld
+		pla
+		pla
 		pla
 		sta 3,s
 		pla

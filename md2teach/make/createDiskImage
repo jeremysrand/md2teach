@@ -15,7 +15,7 @@ shift
 FILE="$1"
 shift
 
-BOOTCOPYPATH=""
+BOOTCOPYPATH="System/SHS.Babelfish"
 
 PROGRAM=`basename "$FILE"`
 TMPDIR=/tmp/a2gs_mount.$$

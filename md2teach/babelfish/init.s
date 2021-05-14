@@ -10,5 +10,7 @@
         keep init
 
 init start
+		phb
+		plb
         rtl
         end

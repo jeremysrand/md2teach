@@ -9,7 +9,7 @@ include make/head.mk
 # where to find files, etc.
 
 # The name of your system or binary file to build goes here:
-PGM=markdown
+PGM=notused
 
 # Set the target type you would like to build.  The options are:
 #     shell - A shell command for ORCA, GNO or other GS shell
@@ -175,10 +175,26 @@ gen:
 # clean your build.
 genclean:
 
-$(TARGETDIR)/filter.bin: $(OBJDIR)/babelfish/filter.ROOT
-	cd $(OBJDIR); $(LINK) $(LDFLAGS) babelfish/filter keep="$(abspath $@)"
 
-target: $(TARGETDIR)/filter.bin
+FILTERTARGET=$(TARGETDIR)/filter.bin
+INITTARGET=$(TARGETDIR)/init.bin
+REZFLAGS+= rez='-d TARGETDIR="$(TARGETDIR)"'
+
+$(OBJDIR)/babelfish/markdown.r: $(FILTERTARGET) $(INITTARGET)
+
+$(FILTERTARGET): $(OBJDIR)/babelfish/filter.ROOT
+	cd $(OBJDIR); $(LINK) $(LDFLAGS) babelfish/filter keep="$(abspath $@)"
+    
+$(INITTARGET): $(OBJDIR)/babelfish/init.ROOT
+	cd $(OBJDIR); $(LINK) $(LDFLAGS) babelfish/init keep="$(abspath $@)"
+
+$(TARGETDIR)/Markdown: $(OBJDIR)/babelfish/markdown.r
+	$(MKDIR) $(TARGETDIR)
+	$(RM) $@
+	$(CP) $< $@
+	$(CHTYP) -t $(FILETYPE) $(AUXTYPE) $@
+
+target: $(TARGETDIR)/Markdown
 	true
 
 # Do not change anything else below here...

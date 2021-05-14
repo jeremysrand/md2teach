@@ -8,8 +8,8 @@
 
 
 #include "types.rez"
-#include "babelfish_defs.h"
-#include "babelfish_rez.h"
+#include "babelfish/babelfish_defs.h"
+#include "babelfish/babelfish_rez.h"
 
 
 resource rVersion(TrVersion)
@@ -43,8 +43,8 @@ resource rTrData(TrData)
 };
 
 
-read rCodeResource(TrFilter, locked, convert) "filter.bin";
-read rCodeResource(TrInit, locked, convert) "init.bin";
+read rCodeResource(TrFilter, locked, convert) TARGETDIR "/filter.bin";
+read rCodeResource(TrInit, locked, convert) TARGETDIR "/init.bin";
 
 
 resource rText(TrImportInfo)
