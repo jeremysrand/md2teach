@@ -185,7 +185,7 @@ $(OBJDIR)/babelfish/markdown.r: $(FILTERTARGET) $(INITTARGET)
 $(FILTERTARGET): $(OBJDIR)/babelfish/filter.ROOT
 	cd $(OBJDIR); $(LINK) $(LDFLAGS) babelfish/filter keep="$(abspath $@)"
     
-$(INITTARGET): $(OBJDIR)/babelfish/init.ROOT
+$(INITTARGET): $(OBJDIR)/babelfish/init.root $(OBJDIR)/md4c.a
 	cd $(OBJDIR); $(LINK) $(LDFLAGS) babelfish/init keep="$(abspath $@)"
 
 $(TARGETDIR)/Markdown: $(OBJDIR)/babelfish/markdown.r

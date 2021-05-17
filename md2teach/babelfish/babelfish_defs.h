@@ -42,4 +42,8 @@
 #define TrFormatFont            0x0005
 #define TrFormatSound           0x0006
 
+#define TrStartUp       0x9101
+#define TrShutDown      0x9102
+#define TrRead          0x9103
+
 #endif /* define _GUARD_PROJECTmd2teach_FILEbabelfish_defs_ */
