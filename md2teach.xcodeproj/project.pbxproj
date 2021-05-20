@@ -45,9 +45,10 @@
 		9D406AC4264A2AD400747EE9 /* babelfish_defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = babelfish_defs.h; sourceTree = "<group>"; };
 		9D406ACB264A2B5800747EE9 /* babelfish_rez.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = babelfish_rez.h; sourceTree = "<group>"; };
 		9D406ACD264A2BD300747EE9 /* markdown.rez */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.rez; path = markdown.rez; sourceTree = "<group>"; };
-		9D406AD8264C50E400747EE9 /* init.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = init.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		9D406AD8264C50E400747EE9 /* request.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = request.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		9D406AD9264C50F700747EE9 /* filter.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = filter.s; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.asm.orcam; };
 		9D406B2D2652155B00747EE9 /* babelfish_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = babelfish_types.h; sourceTree = "<group>"; };
+		9D406B312652D2C800747EE9 /* init.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = init.s; sourceTree = "<group>"; };
 		9D6532E42626240800105D50 /* md2teach */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = md2teach; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D6532EA2626240800105D50 /* doNotBuild */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = doNotBuild; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D6532EC2626240800105D50 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
@@ -111,7 +112,8 @@
 				9D406ACB264A2B5800747EE9 /* babelfish_rez.h */,
 				9D406B2D2652155B00747EE9 /* babelfish_types.h */,
 				9D406ACD264A2BD300747EE9 /* markdown.rez */,
-				9D406AD8264C50E400747EE9 /* init.c */,
+				9D406AD8264C50E400747EE9 /* request.c */,
+				9D406B312652D2C800747EE9 /* init.s */,
 				9D406AD9264C50F700747EE9 /* filter.s */,
 			);
 			path = babelfish;

@@ -46,4 +46,15 @@
 #define TrShutDown      0x9102
 #define TrRead          0x9103
 
+#define bfContinue     0
+#define bfDone         0x8000
+#define bfUserAbort    0x8001
+#define bfBadFileErr   0x8002
+#define bfReadErr      0x8003
+#define bfWriteErr     0x8004
+#define bfMemErr       0x8005
+
+#define bfTextGetSettings   1
+#define bfTextBody          8
+
 #endif /* define _GUARD_PROJECTmd2teach_FILEbabelfish_defs_ */

@@ -66,7 +66,7 @@ typedef struct TrTransferRecord
     Word currentTherm;
     char * msgPtr;
     TrDataRecord * dataRecordPtr;
-    char * filePathPtr;     /* C string*/
+    GSString255 * filePathPtr;
     char * fileNamePtr;     /* P string */
 } TrTransferRecord;
 
