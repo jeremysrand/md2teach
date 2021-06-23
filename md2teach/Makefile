@@ -11,6 +11,8 @@ include make/head.mk
 # The name of your system or binary file to build goes here:
 PGM=md2teach
 
+# DEBUGBUILD=1
+
 # Set the target type you would like to build.  The options are:
 # 	shell - A shell command for ORCA, GNO or other GS shell
 # 	desktop - A full desktop application

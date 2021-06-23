@@ -196,8 +196,13 @@ executeGUI: all
 	make/launchEmulator "$(DISKIMAGE)" "$(DESTBOOTIMAGE)"
 
 executeShell: all
+	$(ORCA) $(TARGETDIR)/$(PGM) Read.Me.md $(TARGETDIR)/Read.Me
+ifeq ($(DEBUGBUILD),1)
 	$(ORCA) --mem $(TARGETDIR)/$(PGM) -d test.md $(TARGETDIR)/test.txt
-	make/createDiskImage "$(DISKIMAGE)" $(DESTBOOTIMAGE) "$(TARGETDIR)/md2teach" "$(TARGETDIR)/test.txt"
+	make/createDiskImage "$(DISKIMAGE)" $(DESTBOOTIMAGE) "$(TARGETDIR)/$(PGM)" "$(TARGETDIR)/Read.Me" "$(TARGETDIR)/test.txt"
+else
+	make/createDiskImage "$(DISKIMAGE)" $(DESTBOOTIMAGE) "$(TARGETDIR)/$(PGM)" "$(TARGETDIR)/Read.Me"
+endif
 	make/launchEmulator "$(DISKIMAGE)" "$(DESTBOOTIMAGE)"
 
 $(OBJDIR)/%.a:	%.c

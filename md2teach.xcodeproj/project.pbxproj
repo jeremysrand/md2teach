@@ -59,6 +59,7 @@
 		9D8125E32634AC4A002F05F5 /* translate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = translate.c; sourceTree = "<group>"; };
 		9D8125F12634B4D4002F05F5 /* style.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = style.h; sourceTree = "<group>"; };
 		9D8125F22634B4D4002F05F5 /* style.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = style.c; sourceTree = "<group>"; };
+		9DBA97F82682E9EA001C2142 /* Read.Me.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Read.Me.md; sourceTree = "<group>"; };
 		9DDFC7B026269D23006D6E71 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		9DDFC7B126269D3F006D6E71 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9DDFC7B42627E081006D6E71 /* test.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = test.md; sourceTree = "<group>"; };
@@ -115,6 +116,7 @@
 				9D8125F22634B4D4002F05F5 /* style.c */,
 				9D6532EE2626240800105D50 /* Makefile */,
 				9DDFC7B42627E081006D6E71 /* test.md */,
+				9DBA97F82682E9EA001C2142 /* Read.Me.md */,
 				9D6532F02626240800105D50 /* make */,
 				9D6532FB2626240800105D50 /* Supporting Files */,
 			);
