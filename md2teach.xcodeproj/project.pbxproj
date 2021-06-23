@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9D6532ED2626240800105D50 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 9D6532EC2626240800105D50 /* main.c */; };
-		9D6532EF2626240800105D50 /* shell.mk in Sources */ = {isa = PBXBuildFile; fileRef = 9D6532EE2626240800105D50 /* shell.mk */; };
+		9D6532EF2626240800105D50 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 9D6532EE2626240800105D50 /* Makefile */; };
 		9D6532F22626240800105D50 /* head.mk in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532F12626240800105D50 /* head.mk */; };
 		9D6532F42626240800105D50 /* orca-asm in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532F32626240800105D50 /* orca-asm */; };
 		9D6532F62626240800105D50 /* orca-cc in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9D6532F52626240800105D50 /* orca-cc */; };
@@ -40,19 +40,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		9D406AA12644E8CF00747EE9 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
-		9D406AB12644EB6500747EE9 /* babelfish.mk */ = {isa = PBXFileReference; lastKnownFileType = text; path = babelfish.mk; sourceTree = "<group>"; };
-		9D406AC4264A2AD400747EE9 /* babelfish_defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = babelfish_defs.h; sourceTree = "<group>"; };
-		9D406ACB264A2B5800747EE9 /* babelfish_rez.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = babelfish_rez.h; sourceTree = "<group>"; };
-		9D406ACD264A2BD300747EE9 /* markdown.rez */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.rez; path = markdown.rez; sourceTree = "<group>"; };
-		9D406AD8264C50E400747EE9 /* request.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = request.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
-		9D406AD9264C50F700747EE9 /* filter.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = filter.s; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.asm.orcam; };
-		9D406B2D2652155B00747EE9 /* babelfish_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = babelfish_types.h; sourceTree = "<group>"; };
-		9D406B312652D2C800747EE9 /* init.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = init.s; sourceTree = "<group>"; };
 		9D6532E42626240800105D50 /* md2teach */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = md2teach; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D6532EA2626240800105D50 /* doNotBuild */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = doNotBuild; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D6532EC2626240800105D50 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		9D6532EE2626240800105D50 /* shell.mk */ = {isa = PBXFileReference; lastKnownFileType = text; path = shell.mk; sourceTree = "<group>"; };
+		9D6532EE2626240800105D50 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		9D6532F12626240800105D50 /* head.mk */ = {isa = PBXFileReference; lastKnownFileType = text; path = head.mk; sourceTree = "<group>"; };
 		9D6532F32626240800105D50 /* orca-asm */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "orca-asm"; sourceTree = "<group>"; };
 		9D6532F52626240800105D50 /* orca-cc */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "orca-cc"; sourceTree = "<group>"; };
@@ -90,35 +81,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		9D406A9C2644E80100747EE9 /* shell */ = {
-			isa = PBXGroup;
-			children = (
-				9D6532EC2626240800105D50 /* main.c */,
-				9D8125DA2634A539002F05F5 /* main.h */,
-				9D8125DB2634A584002F05F5 /* io.h */,
-				9D8125DC2634A584002F05F5 /* io.c */,
-				9D8125E22634AC4A002F05F5 /* translate.h */,
-				9D8125E32634AC4A002F05F5 /* translate.c */,
-				9D8125F12634B4D4002F05F5 /* style.h */,
-				9D8125F22634B4D4002F05F5 /* style.c */,
-			);
-			path = shell;
-			sourceTree = "<group>";
-		};
-		9D406AB02644EB4E00747EE9 /* babelfish */ = {
-			isa = PBXGroup;
-			children = (
-				9D406AC4264A2AD400747EE9 /* babelfish_defs.h */,
-				9D406ACB264A2B5800747EE9 /* babelfish_rez.h */,
-				9D406B2D2652155B00747EE9 /* babelfish_types.h */,
-				9D406ACD264A2BD300747EE9 /* markdown.rez */,
-				9D406AD8264C50E400747EE9 /* request.c */,
-				9D406B312652D2C800747EE9 /* init.s */,
-				9D406AD9264C50F700747EE9 /* filter.s */,
-			);
-			path = babelfish;
-			sourceTree = "<group>";
-		};
 		9D6532DD2626240800105D50 = {
 			isa = PBXGroup;
 			children = (
@@ -141,13 +103,17 @@
 		9D6532EB2626240800105D50 /* md2teach */ = {
 			isa = PBXGroup;
 			children = (
-				9D406AA12644E8CF00747EE9 /* Makefile */,
 				9D65330C2626246700105D50 /* md4c.c */,
 				9D65330B2626246700105D50 /* md4c.h */,
-				9D6532EE2626240800105D50 /* shell.mk */,
-				9D406A9C2644E80100747EE9 /* shell */,
-				9D406AB12644EB6500747EE9 /* babelfish.mk */,
-				9D406AB02644EB4E00747EE9 /* babelfish */,
+				9D6532EC2626240800105D50 /* main.c */,
+				9D8125DA2634A539002F05F5 /* main.h */,
+				9D8125DB2634A584002F05F5 /* io.h */,
+				9D8125DC2634A584002F05F5 /* io.c */,
+				9D8125E22634AC4A002F05F5 /* translate.h */,
+				9D8125E32634AC4A002F05F5 /* translate.c */,
+				9D8125F12634B4D4002F05F5 /* style.h */,
+				9D8125F22634B4D4002F05F5 /* style.c */,
+				9D6532EE2626240800105D50 /* Makefile */,
 				9DDFC7B42627E081006D6E71 /* test.md */,
 				9D6532F02626240800105D50 /* make */,
 				9D6532FB2626240800105D50 /* Supporting Files */,
@@ -276,7 +242,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9D8125E42634AC4A002F05F5 /* translate.c in Sources */,
-				9D6532EF2626240800105D50 /* shell.mk in Sources */,
+				9D6532EF2626240800105D50 /* Makefile in Sources */,
 				9D8125DD2634A584002F05F5 /* io.c in Sources */,
 				9D8125F32634B4D4002F05F5 /* style.c in Sources */,
 				9D6532ED2626240800105D50 /* main.c in Sources */,

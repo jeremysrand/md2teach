@@ -13,9 +13,9 @@
 #include <memory.h>
 #include <textedit.h>
 
-#include "shell/io.h"
-#include "shell/main.h"
-#include "shell/style.h"
+#include "io.h"
+#include "main.h"
+#include "style.h"
 
 
 // Defines
