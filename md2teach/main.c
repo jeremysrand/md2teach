@@ -16,6 +16,8 @@
 #include "translate.h"
 
 
+#define VERSION "1.0"
+
 // GS_TODO - How big does the stack need to be?  In looking over the code,
 // I don't see massive stack frames due to large globals (other than the
 // context which I made static).  But I do see lots of arguments and if
@@ -43,7 +45,18 @@ int generateRez = 0;
 
 static void printUsage(void)
 {
-    fprintf(stderr, "USAGE: %s [ -d ] [ -r ] inputfile outputfile\n", commandName);
+    fprintf(stderr, "USAGE: %s [ -d ] [ -r ] [ -v ] inputfile outputfile\n", commandName);
+}
+
+static void printVersion(void)
+{
+    printf("%s Version " VERSION "\n", commandName);
+    printf("  Written by Jeremy Rand\n");
+    printf("  https://github.com/jeremysrand/md2teach\n");
+    printf("\n");
+    printf("  Based on the md4c library\n");
+    printf("  https://github.com/mity/md4c\n");
+    exit(0);
 }
 
 
@@ -68,6 +81,10 @@ static int parseArgs(int argc, char * argv[])
                     
                 case 'r':
                     generateRez = 1;
+                    break;
+                    
+                case 'v':
+                    printVersion();
                     break;
                 
                 default:
